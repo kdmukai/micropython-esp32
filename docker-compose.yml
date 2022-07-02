@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+
+  esp32_builder:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    # Keep the container running with a trivial ongoing task
+    command: tail -F /dev/null
+    volumes:
+      # Expose localhost files to the container, mapped to its '/code' dir
+      - .:/code
