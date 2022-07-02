@@ -1,5 +1,5 @@
 # MicroPython-esp32
-The [Unexpected Maker FeatherS2](https://feathers2.io/) (ESP32-S2) comes pre-loaded with the CircuitPython UF2 bootloader. The following steps will replace the UF2 bootloader with MicroPython.
+Create a custom MicroPython firmware for an ESP32 board with `secp256k1` compiled in.
 
 
 ## Build the custom MicroPython firmware
@@ -9,14 +9,18 @@ docker-compose build
 docker-compose up
 ```
 
-Inside the container:
+Run the `container_bash.sh` script to get a shell prompt inside the container (you may need to edit the container's name in the script).
+
+Once you're inside the container, build the ESP32 firmware:
 ```bash
 cd ports/esp32
+
+# This example targets the UM FeatherS2 board
 make BOARD=UM_FEATHERS2 USER_C_MODULES=/root/usermods/secp256k1-embedded/micropython.cmake CFLAGS_EXTRA=-DMODULE_SECP256K1_ENABLED=1
 ```
 
 
-## Install MicroPython
+## Write the firmware to the board
 see: https://docs.micropython.org/en/latest/esp32/tutorial/intro.html#esp32-intro
 
 With Python 3.x on your local machine:
@@ -59,8 +63,6 @@ You should see:
     esptool.py can not exit the download mode over USB. To run the app, reset the chip manually.
     To suppress this note, set --after option to 'no_reset'.
 ```
-
-Download the latest Release firmware at: https://micropython.org/download/featherS2/
 
 Flash the MicroPython firmware to the FeatherS2:
 ```bash
