@@ -5,6 +5,9 @@ RUN apt update
 RUN apt install -y software-properties-common curl nano
 RUN add-apt-repository ppa:pybricks/ppa
 
+# Need Automake
+RUN apt install -y autoconf libtool
+
 # Setup steps from Espressif for ESP32: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
 RUN apt install -y git wget flex bison gperf python3 python3-venv python3-dev cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0
 
@@ -24,7 +27,7 @@ WORKDIR /root/home/esp/esp-idf
 RUN ./install.sh esp32,esp32s2,esp32s3
 
 WORKDIR /root
-RUN git clone -b v1.18 https://github.com/micropython/micropython.git
+RUN git clone -b v1.18_custom https://github.com/kdmukai/micropython.git
 
 # Build mpy-cross
 WORKDIR /root/micropython
@@ -38,12 +41,19 @@ RUN make -j6 submodules
 WORKDIR /root
 RUN mkdir usermods
 WORKDIR /root/usermods
-RUN git clone --recursive https://github.com/diybitcoinhardware/secp256k1-embedded.git
+RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-embedded.git
 
-# Add CMake support to secp256k1-embedded
-COPY docker/secp256k1-embedded-micropython.cmake /root/usermods/secp256k1-embedded/micropython.cmake
+# # Add CMake support to secp256k1-embedded
+# COPY docker/secp256k1-embedded-micropython.cmake /root/usermods/secp256k1-embedded/micropython.cmake
+
+# # Add the extra #define to ecmult_impl.h
+# COPY docker/ecmult_impl.h /root/usermods/secp256k1-embedded/secp256k1/src/ecmult_impl.h
+
+# Copy the libsecp256k1_config.h
+# WORKDIR /root/usermods/secp256k1-embedded
+# RUN cp mpy/config/libsecp256k1-config.h secp256k1/src/.
 
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
 
-WORKDIR /root/micropython
+WORKDIR /root/micropython/ports/esp32

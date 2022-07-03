@@ -11,13 +11,17 @@ docker-compose up
 
 Run the `container_bash.sh` script to get a shell prompt inside the container (you may need to edit the container's name in the script).
 
-Once you're inside the container, build the ESP32 firmware:
+Once you're inside the container, you can compile the custom firmware:
 ```bash
-cd ports/esp32
-
 # This example targets the UM FeatherS2 board
-make BOARD=UM_FEATHERS2 USER_C_MODULES=/root/usermods/secp256k1-embedded/micropython.cmake CFLAGS_EXTRA=-DMODULE_SECP256K1_ENABLED=1
+idf.py -D MICROPY_BOARD=UM_FEATHERS2 -B build-um_feathers2 -DUSER_C_MODULES=/root/usermods/secp256k1-embedded/micropython.cmake build
+
+# Copy the compiled artifacts over to the shared /code volume so you can access them outside the container
+cp build-um_feathers2/bootloader/bootloader.bin /code/.
+cp build-um_feathers2/partition_table/partition-table.bin /code/.
+cp build-um_feathers2/micropython.bin /code/.
 ```
+
 
 
 ## Write the firmware to the board
@@ -38,41 +42,32 @@ The board's port name should either be `tty.usbmodem01` or `cu.usbmodem01` (olde
 ls /dev
 ```
 
-Clear the existing bootloader:
+Write in the new firmware
 ```bash
 esptool.py --port /dev/tty.usbmodem01 erase_flash
+esptool.py -p /dev/tty.usbmodem01 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
-You should see:
-```
-    esptool.py v4.1
-    Serial port /dev/tty.usbmodem01
-    Connecting...
-    Detecting chip type... Unsupported detection protocol, switching and trying again...
-    Detecting chip type... ESP32-S2
-    Chip is ESP32-S2
-    Features: WiFi, No Embedded Flash, No Embedded PSRAM, ADC and temperature sensor calibration in BLK2 of efuse V1
-    Crystal is 40MHz
-    MAC: 84:f7:03:73:9f:78
-    Uploading stub...
-    Running stub...
-    Stub running...
-    Erasing flash (this may take a while)...
-    Chip erase completed successfully in 34.9s
-    WARNING: ESP32-S2 chip was placed into download mode using GPIO0.
-    esptool.py can not exit the download mode over USB. To run the app, reset the chip manually.
-    To suppress this note, set --after option to 'no_reset'.
-```
-
-Flash the MicroPython firmware to the FeatherS2:
-```bash
-esptool.py --chip esp32s2 --port /dev/tty.usbmodem01 write_flash -z 0x1000 featherS2-20220618-v1.19.1.bin
-```
+Once it's complete, press RST to reset the board to normal operations. It will remount itself with a different name (e.g. `/dev/tty.usbmodem1234561`).
 
 
 ## Interact with the board
 Install the `ampy` tool:
 ```bash
 pip install adafruit-ampy
+```
+
+```bash
+# List the files on the board
+ampy -p /dev/tty.usbmodem1234561 ls
+
+# Transfer a file
+ampy -p /dev/tty.usbmodem1234561 put blah.py
+
+# Transfer a whole directory
+ampy -p /dev/tty.usbmodem1234561 put embit
+
+# Run an arbitrary local python file on the ESP32
+ampy -p /dev/tty.usbmodem1234561 run test.py
 ```
 
