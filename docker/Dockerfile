@@ -30,12 +30,12 @@ WORKDIR /root
 RUN git clone -b v1.18_custom https://github.com/kdmukai/micropython.git
 
 # Freeze embit into the ESP32 firmware; remove unnecessary dirs, copy only the python code over
-WORKDIR /root
-RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
-WORKDIR /root/embit
-RUN rm -rf src/embit/liquid
-RUN rm -rf src/embit/util
-RUN cp -r /root/embit/src/embit /root/micropython/ports/esp32/modules/.
+# WORKDIR /root
+# RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
+# WORKDIR /root/embit
+# RUN rm -rf src/embit/liquid
+# RUN rm -rf src/embit/util
+# RUN cp -r /root/embit/src/embit /root/micropython/ports/esp32/modules/.
 
 # Build mpy-cross
 WORKDIR /root/micropython

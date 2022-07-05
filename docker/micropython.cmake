@@ -14,15 +14,17 @@ target_include_directories(secp256k1 INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/secp256k1-embedded/secp256k1/src
     ${CMAKE_CURRENT_LIST_DIR}/secp256k1-embedded/mpy/config
 )
+# Be sure to set the -O2 "optimize" flag!!
 target_compile_options(secp256k1 INTERFACE
     -DHAVE_CONFIG_H 
     -Wno-unused-function
     -Wno-error
+    -O2
 )
-
 
 # Link our INTERFACE library to the usermod target.
 target_link_libraries(usermod INTERFACE secp256k1)
+
 
 # Create an INTERFACE library for our C module.
 add_library(hashlib INTERFACE)
@@ -42,6 +44,11 @@ target_sources(hashlib INTERFACE
 target_include_directories(hashlib INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/uhashlib/
     ${CMAKE_CURRENT_LIST_DIR}/uhashlib/crypto
+)
+
+# Be sure to set the -O2 "optimize" flag!!
+target_compile_options(hashlib INTERFACE
+    -O2
 )
 
 # Link our INTERFACE library to the usermod target.
