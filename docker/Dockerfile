@@ -29,6 +29,15 @@ RUN ./install.sh esp32,esp32s2,esp32s3
 WORKDIR /root
 RUN git clone -b v1.18_custom https://github.com/kdmukai/micropython.git
 
+# Freeze embit into the ESP32 firmware; remove unnecessary dirs, copy only the python code over
+WORKDIR /root
+RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
+WORKDIR /root/embit/src
+RUN rm -rf embit/src/embit/liquid
+RUN rm -rf embit/src/embit/util
+RUN rm -rf embit/tests
+RUN cp -r embit /root/micropython/ports/esp32/modules/.
+
 # Build mpy-cross
 WORKDIR /root/micropython
 RUN make -j6 -C mpy-cross
@@ -42,16 +51,7 @@ WORKDIR /root
 RUN mkdir usermods
 WORKDIR /root/usermods
 RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-embedded.git
-
-# # Add CMake support to secp256k1-embedded
-# COPY docker/secp256k1-embedded-micropython.cmake /root/usermods/secp256k1-embedded/micropython.cmake
-
-# # Add the extra #define to ecmult_impl.h
-# COPY docker/ecmult_impl.h /root/usermods/secp256k1-embedded/secp256k1/src/ecmult_impl.h
-
-# Copy the libsecp256k1_config.h
-# WORKDIR /root/usermods/secp256k1-embedded
-# RUN cp mpy/config/libsecp256k1-config.h secp256k1/src/.
+RUN git clone https://github.com/kdmukai/uhashlib.git
 
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
