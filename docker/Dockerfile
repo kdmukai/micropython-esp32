@@ -32,11 +32,10 @@ RUN git clone -b v1.18_custom https://github.com/kdmukai/micropython.git
 # Freeze embit into the ESP32 firmware; remove unnecessary dirs, copy only the python code over
 WORKDIR /root
 RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
-WORKDIR /root/embit/src
-RUN rm -rf embit/src/embit/liquid
-RUN rm -rf embit/src/embit/util
-RUN rm -rf embit/tests
-RUN cp -r embit /root/micropython/ports/esp32/modules/.
+WORKDIR /root/embit
+RUN rm -rf src/embit/liquid
+RUN rm -rf src/embit/util
+RUN cp -r /root/embit/src/embit /root/micropython/ports/esp32/modules/.
 
 # Build mpy-cross
 WORKDIR /root/micropython
@@ -52,6 +51,7 @@ RUN mkdir usermods
 WORKDIR /root/usermods
 RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-embedded.git
 RUN git clone https://github.com/kdmukai/uhashlib.git
+COPY docker/micropython.cmake /root/usermods/micropython.cmake
 
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
