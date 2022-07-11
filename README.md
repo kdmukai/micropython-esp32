@@ -30,6 +30,15 @@ cp build-generic_s3_spiram/partition_table/partition-table.bin /code/feather_s3/
 cp build-generic_s3_spiram/micropython.bin /code/feather_s3/.
 ```
 
+Steps for Generic esp32 (WROOM, etc)
+```bash
+idf.py -D MICROPY_BOARD=GENERIC -B build-generic -DUSER_C_MODULES=/root/usermods/micropython.cmake build
+cp build-generic/bootloader/bootloader.bin /code/generic_esp32/.
+cp build-generic/partition_table/partition-table.bin /code/generic_esp32/.
+cp build-generic/micropython.bin /code/generic_esp32/.
+```
+
+
 
 
 ## Write the firmware to the board
@@ -64,9 +73,12 @@ esptool.py -p /dev/tty.usbmodem101 -b 460800 --before default_reset --chip esp32
 ```
 
 ### Generic ESP-32 (WROOM, etc)
+* Press and hold 100
+* Press EN and release
+* Release 100
 ```
 esptool.py --port /dev/tty.usbserial-0001 erase_flash
-esptool.py -p /dev/tty.usbserial-0001 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
+esptool.py -p /dev/tty.usbserial-0001 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 40m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
 Once it's complete, press RST to reset the board to normal operations. It will remount itself with a different name (e.g. `/dev/tty.usbmodem1234561`).
@@ -92,3 +104,42 @@ ampy -p /dev/tty.usbmodem1234561 put embit
 ampy -p /dev/tty.usbmodem1234561 run test.py
 ```
 
+
+
+# Raspi RP2040
+In the Docker container:
+```bash
+cd /root/micropython/ports/rp2
+make -j6 submodules
+
+# Compile the custom firmware for RP2040
+idf.py -D MICROPY_BOARD=PICO -B build-pico -DUSER_C_MODULES=/root/usermods/micropython.cmake build
+
+# Copy the completed firmware to shared volume
+cp build-pico/firmware.uf2 /code/pico/.
+```
+
+Hold down the `BOOTSEL` button while restarting the Pico. It will mount itself as USB drive RPI-RP2.
+
+Drag the `.u2f` file to the RPI-RP2 disk. It will copy and then remount itself.
+
+On your local machine:
+```bash
+ampy -p /dev/tty.usbmodem01 run test.py
+```
+
+
+# Random MicroPython notes
+Get the platform:
+```python
+>>> import usys
+>>> usys.platform
+'esp32'
+```
+
+Get full firmware details:
+```python
+>>> import os
+>>> os.uname()
+(sysname='esp32', nodename='esp32', release='1.18.0', version='v1.18-4-g5c8f5b4ce-dirty on 2022-07-05', machine='FeatherS2 with ESP32-S2')
+```

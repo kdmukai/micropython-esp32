@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  esp32_builder:
+  firmware_builder:
     build:
       context: .
       dockerfile: docker/Dockerfile

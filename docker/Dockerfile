@@ -53,6 +53,9 @@ RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-
 RUN git clone https://github.com/kdmukai/uhashlib.git
 COPY docker/micropython.cmake /root/usermods/micropython.cmake
 
+# Raspi RP2040 compiler
+RUN apt install -y gcc-arm-none-eabi build-essential
+
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
 

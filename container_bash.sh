@@ -1,2 +1,2 @@
 #!/bin/bash
-docker container exec -it micropython-esp32_esp32_builder_1 bash
+docker container exec -it micropython-esp32-firmware_builder-1 bash
