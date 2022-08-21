@@ -1,5 +1,5 @@
 # Pull base image: Ubuntu v20.x (aka "focal")
-FROM arm64v8/ubuntu:focal
+FROM ubuntu:focal
 
 RUN apt update
 RUN apt install -y software-properties-common curl nano
