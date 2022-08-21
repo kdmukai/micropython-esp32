@@ -1,10 +1,8 @@
 frozen_mpy
+embit
+ampy
 usermods
-feather_s2
-feather_s3
-generic_esp32
-pico/
-embit-esp32
+build/
 
 # Prerequisites
 *.d
