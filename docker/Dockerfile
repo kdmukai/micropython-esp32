@@ -18,7 +18,7 @@ RUN python3 get-pip.py
 RUN rm get-pip.py
 RUN pip3 install esptool
 
-# Get ESP-IDF
+# Get ESP-IDF compiler for esp32
 WORKDIR /root/home
 RUN mkdir -p esp
 WORKDIR /root/home/esp
@@ -27,8 +27,8 @@ WORKDIR /root/home/esp/esp-idf
 RUN ./install.sh esp32,esp32s2,esp32s3
 
 WORKDIR /root
-# Build off of esixtyone's fork of lv_micropython w/his tweaks for esp32-S2
-RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git
+# Build MicroPython firmware from esixtyone's fork of lv_micropython w/his tweaks for esp32-S2
+RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git micropython
 
 # Freeze embit into the ESP32 firmware; remove unnecessary dirs, copy only the python code over
 WORKDIR /root
@@ -36,7 +36,6 @@ RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
 WORKDIR /root/embit
 RUN rm -rf src/embit/liquid
 RUN rm -rf src/embit/util
-# RUN cp -r /root/embit/src/embit /root/micropython/ports/esp32/modules/.
 RUN ln -s /root/embit/src/embit /root/micropython/ports/esp32/modules/embit
 
 # Build mpy-cross
