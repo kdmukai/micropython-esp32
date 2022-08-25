@@ -11,20 +11,58 @@ docker-compose up
 
 Run the `container_bash.sh` script to get a shell prompt inside the container (you may need to edit the container's name in the script).
 
-Once you're inside the container, you can compile the custom firmware:
+### Configure board target for LVGL compatibility
+The `boards/GENERIC_S2` sdkconfig has already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its sdkconfig.board:
+```
+CONFIG_ETH_ENABLED=n
+CONFIG_ETH_USE_SPI_ETHERNET=n
+```
+
+### Expand app partition when necessary
+If your compilation fails with something like:
+```
+Error: app partition is too small for binary micropython.bin size 0x1f28d0:
+  - Part 'factory' 0/0 @ 0x10000 size 0x1f0000 (overflow 0x28d0)
+```
+
+You'll need to alter the partition sizes for your target board.
+
+Copy of `partitions-16MiB.csv` to `partitions-16MiB-lvgl.csv` and make the following changes:
+
+* Expand the `factory` partition from `0x1F0000` to `0x2F0000`.
+* Shift the next partition's Offset by the same amount: from `0x200000` to `0x300000`.
+* Reduce the size of the "vfs" partition by the same amount: from `0xE00000` to `0xD00000`.
+
+```
+factory,  app,  factory, 0x10000, 0x2F0000,
+vfs,      data, fat,     0x300000, 0xD00000,
+```
+
+Then configure the board to use your new partitions:
+```
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-lvgl.csv"
+```
+
+### Compile the firmware for the target board
+Now we can compile the custom firmware:
 ```bash
 # This example targets the UM FeatherS2 board
-idf.py -D MICROPY_BOARD=UM_FEATHERS2 -B build-um_feathers2 -DUSER_C_MODULES=/root/usermods/micropython.cmake build
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=UM_FEATHERS2 USER_C_MODULES=/root/usermods/micropython.cmake
 
 # Copy the compiled artifacts over to the shared /code volume so you can access them outside the container
-cp build-um_feathers2/bootloader/bootloader.bin /code/feather_s2/.
-cp build-um_feathers2/partition_table/partition-table.bin /code/feather_s2/.
-cp build-um_feathers2/micropython.bin /code/feather_s2/.
+cp build-UM_FEATHERS2/bootloader/bootloader.bin /code/build/feather_s2/.
+cp build-UM_FEATHERS2/partition_table/partition-table.bin /code/build/feather_s2/.
+cp build-UM_FEATHERS2/micropython.bin /code/build/feather_s2/.
+
+# Targeting the GENERIC_S2 board
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S2 USER_C_MODULES=/root/usermods/micropython.cmake
+cp build-GENERIC_S2/bootloader/bootloader.bin /code/build/generic_s2/.
+cp build-GENERIC_S2/partition_table/partition-table.bin /code/build/generic_s2/.
+cp build-GENERIC_S2/micropython.bin /code/build/generic_s2/.
 ```
 
 Steps for FeatherS3 (esp32-S3)
 ```bash
-idf.py -D MICROPY_BOARD=GENERIC_S3_SPIRAM -B build-generic_s3_spiram -DUSER_C_MODULES=/root/usermods/micropython.cmake build
 cp build-generic_s3_spiram/bootloader/bootloader.bin /code/feather_s3/.
 cp build-generic_s3_spiram/partition_table/partition-table.bin /code/feather_s3/.
 cp build-generic_s3_spiram/micropython.bin /code/feather_s3/.
@@ -32,7 +70,6 @@ cp build-generic_s3_spiram/micropython.bin /code/feather_s3/.
 
 Steps for Generic esp32 (WROOM, etc)
 ```bash
-idf.py -D MICROPY_BOARD=GENERIC -B build-generic -DUSER_C_MODULES=/root/usermods/micropython.cmake build
 cp build-generic/bootloader/bootloader.bin /code/generic_esp32/.
 cp build-generic/partition_table/partition-table.bin /code/generic_esp32/.
 cp build-generic/micropython.bin /code/generic_esp32/.
