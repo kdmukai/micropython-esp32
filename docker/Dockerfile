@@ -28,50 +28,49 @@ RUN ./install.sh esp32,esp32s2,esp32s3
 
 WORKDIR /root
 # Build MicroPython firmware from esixtyone's fork of lv_micropython w/his tweaks for esp32-S2
-RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git
-WORKDIR /root/lv_micropython
+# RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git
+# WORKDIR /root/lv_micropython
 
-RUN git submodule update --init --recursive lib/lv_bindings
+# RUN git submodule update --init --recursive lib/lv_bindings
 
 # Freeze embit into the ESP32 firmware; remove unnecessary dirs, soft link from modules
-WORKDIR /root
-RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
-WORKDIR /root/embit
-RUN rm -rf src/embit/liquid
-RUN rm -rf src/embit/util
-RUN ln -s /root/embit/src/embit /root/lv_micropython/ports/esp32/modules/embit
+# WORKDIR /root
+# RUN git clone -b v0.5.0 https://github.com/diybitcoinhardware/embit.git
+# WORKDIR /code/deps/embit
+# RUN rm -rf src/embit/liquid
+# RUN rm -rf src/embit/util
+# RUN ln -s /code/deps/embit/src/embit /code/deps/lv_micropython/ports/esp32/modules/embit
 
 # Build mpy-cross
-WORKDIR /root/lv_micropython
-RUN make -C mpy-cross
+# RUN make -C deps/lv_micropython/mpy-cross
 
-# Setup MicroPython ESP32 support
-WORKDIR /root/lv_micropython/ports/esp32
-RUN make submodules
+# # Setup MicroPython ESP32 support
+# WORKDIR /code/deps/lv_micropython/ports/esp32
+# RUN make submodules
 
 # Get additional resources as usermods:
-WORKDIR /root
-RUN mkdir usermods
-WORKDIR /root/usermods
-RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-embedded.git
-RUN git clone -b esp32s2-s3-compatibility https://github.com/diybitcoinhardware/uhashlib.git
+# WORKDIR /root
+# RUN mkdir usermods
+# WORKDIR /root/usermods
+# RUN git clone --recursive -b esp32_support https://github.com/kdmukai/secp256k1-embedded.git
+# RUN git clone -b esp32s2-s3-compatibility https://github.com/diybitcoinhardware/uhashlib.git
 
-# Add cmake file for compiling usermods
-COPY docker/micropython.cmake /root/usermods/micropython.cmake
+# # Add cmake file for compiling usermods
+# COPY docker/micropython.cmake /root/usermods/micropython.cmake
 
-# Add modified partitions to make more room for larger firmware
-COPY docker/partitions-16MiB-lvgl.csv /root/lv_micropython/ports/esp32/partitions-16MiB-lvgl.csv
+# # Add modified partitions to make more room for larger firmware
+# COPY docker/partitions-16MiB-lvgl.csv /root/lv_micropython/ports/esp32/partitions-16MiB-lvgl.csv
 
-# Raspi RP2040 support
-RUN apt install -y gcc-arm-none-eabi build-essential
-WORKDIR /root/lv_micropython/ports/rp2
-RUN make submodules
+# # Raspi RP2040 support
+# RUN apt install -y gcc-arm-none-eabi build-essential
+# WORKDIR /root/lv_micropython/ports/rp2
+# RUN make submodules
 
-# LVGL font converter
-WORKDIR /root
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt install -y nodejs
-RUN npm i lv_font_conv -g
+# # LVGL font converter
+# WORKDIR /root
+# RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# RUN apt install -y nodejs
+# RUN npm i lv_font_conv -g
 
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc

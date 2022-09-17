@@ -4,19 +4,25 @@ Create a custom MicroPython firmware for an ESP32 board with `secp256k1` compile
 ## Clone this repo and its dependencies
 ```bash
 git clone https://github.com/kdmukai/micropython-esp32.git
-
-# clone the esixtyone fork of lv_micropython
 cd micropython-esp32
-git submodule update --init deps/lv_micropython
 
-# And within lv_micropython, clone the esixtyone fork of lv_bindings
+# clone our various submodule dependencies
+git submodule update --init
+
+# And within lv_micropython, recursively clone the esixtyone fork of lv_bindings
 cd deps/lv_micropython
 git submodule update --init --recursive lib/lv_bindings
 
-git submodule update --init deps/embit
+# Recursively clone secp256k1
+cd ../../
 git submodule update --init --recursive deps/usermods/secp256k1-embedded
-git submodule update --init deps/usermods/uhashlib
 
+# embit needs some parts trimmed out of it
+rm -rf deps/embit/src/embit/liquid
+rm -rf deps/embit/src/embit/util
+
+# soft link embit inside lv_micropython
+ln -s deps/embit/src/embit deps/lv_micropython/ports/esp32/modules/embit
 ```
 
 
@@ -29,8 +35,17 @@ docker-compose up
 
 Run the `container_bash.sh` script to get a shell prompt inside the container (you may need to edit the container's name in the script).
 
+## Continue configuration within the container
+```bash
+# Compile the micropython cross compiler
+make -C /code/deps/lv_micropython/mpy-cross
+
+cd /code/deps/lv_micropython/ports/esp32
+make submodules
+```
+
 ### Configure board target for LVGL compatibility
-The `boards/GENERIC_S2` sdkconfig has already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its sdkconfig.board:
+The `boards/GENERIC_S2` sdkconfig has already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its `sdkconfig.board`:
 ```
 CONFIG_ETH_ENABLED=n
 CONFIG_ETH_USE_SPI_ETHERNET=n
@@ -64,19 +79,15 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-lvgl.csv"
 ### Compile the firmware for the target board
 Now we can compile the custom firmware:
 ```bash
-# This example targets the UM FeatherS2 board
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=UM_FEATHERS2 USER_C_MODULES=/root/usermods/micropython.cmake
-
-# Copy the compiled artifacts over to the shared /code volume so you can access them outside the container
-cp build-UM_FEATHERS2/bootloader/bootloader.bin /code/build/feather_s2/.
-cp build-UM_FEATHERS2/partition_table/partition-table.bin /code/build/feather_s2/.
-cp build-UM_FEATHERS2/micropython.bin /code/build/feather_s2/.
 
 # Targeting the GENERIC_S2 board
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S2 USER_C_MODULES=/root/usermods/micropython.cmake
-cp build-GENERIC_S2/bootloader/bootloader.bin /code/build/generic_s2/.
-cp build-GENERIC_S2/partition_table/partition-table.bin /code/build/generic_s2/.
-cp build-GENERIC_S2/micropython.bin /code/build/generic_s2/.
+# Note: we build to a dir inside the container (instead of the shared /code dir) because otherwise
+#   the compiler runs significantly slower.
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S2 BUILD=/root/build-generic_s2 USER_C_MODULES=/code/deps/usermods/micropython.cmake
+mkdir -p /code/build/generic_s2
+cp build-generic_s2/bootloader/bootloader.bin /code/build/generic_s2/.
+cp build-generic_s2/partition_table/partition-table.bin /code/build/generic_s2/.
+cp build-generic_s2/micropython.bin /code/build/generic_s2/.
 ```
 
 Steps for FeatherS3 (esp32-S3)
@@ -168,7 +179,7 @@ cd /root/micropython/ports/rp2
 make -j6 submodules
 
 # Compile the custom firmware for RP2040
-idf.py -D MICROPY_BOARD=PICO -B build-pico -DUSER_C_MODULES=/root/usermods/micropython.cmake build
+idf.py -D MICROPY_BOARD=PICO -B build-pico -DUSER_C_MODULES=/code/deps/usermods/micropython.cmake build
 
 # Copy the completed firmware to shared volume
 cp build-pico/firmware.uf2 /code/pico/.
