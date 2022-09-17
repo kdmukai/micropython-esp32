@@ -1,0 +1,4 @@
+[submodule "deps/lv_micropython"]
+	path = deps/lv_micropython
+	url = https://github.com/esixtyone/lv_micropython.git
+	branch = fix/esp32s2-build
