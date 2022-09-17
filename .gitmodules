@@ -2,3 +2,15 @@
 	path = deps/lv_micropython
 	url = https://github.com/esixtyone/lv_micropython.git
 	branch = fix/esp32s2-build
+[submodule "deps/embit"]
+	path = deps/embit
+	url = https://github.com/diybitcoinhardware/embit.git
+	branch = v0.5.0
+[submodule "deps/usermods/secp256k1-embedded"]
+	path = deps/usermods/secp256k1-embedded
+	url = https://github.com/kdmukai/secp256k1-embedded.git
+	branch = esp32_support
+[submodule "deps/usermods/uhashlib"]
+	path = deps/usermods/uhashlib
+	url = https://github.com/diybitcoinhardware/uhashlib.git
+	branch = esp32s2-s3-compatibility

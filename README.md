@@ -1,6 +1,24 @@
 # MicroPython-esp32
 Create a custom MicroPython firmware for an ESP32 board with `secp256k1` compiled in.
 
+## Clone this repo and its dependencies
+```bash
+git clone https://github.com/kdmukai/micropython-esp32.git
+
+# clone the esixtyone fork of lv_micropython
+cd micropython-esp32
+git submodule update --init deps/lv_micropython
+
+# And within lv_micropython, clone the esixtyone fork of lv_bindings
+cd deps/lv_micropython
+git submodule update --init --recursive lib/lv_bindings
+
+git submodule update --init deps/embit
+git submodule update --init --recursive deps/usermods/secp256k1-embedded
+git submodule update --init deps/usermods/uhashlib
+
+```
+
 
 ## Build the custom MicroPython firmware
 Build and run the Docker container that will be configured to build the firmware
