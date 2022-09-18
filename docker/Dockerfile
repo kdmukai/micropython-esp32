@@ -26,6 +26,10 @@ RUN git clone -b v4.4.1 --recursive https://github.com/espressif/esp-idf.git
 WORKDIR /root/home/esp/esp-idf
 RUN ./install.sh esp32,esp32s2,esp32s3
 
+# Add the esp32-camera driver
+WORKDIR /root/home/esp/esp-idf/components
+RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
+
 WORKDIR /root
 # Build MicroPython firmware from esixtyone's fork of lv_micropython w/his tweaks for esp32-S2
 # RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git
@@ -75,4 +79,4 @@ WORKDIR /root
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
 
-WORKDIR /root/lv_micropython/ports/esp32
+WORKDIR /code/deps/lv_micropython/ports/esp32

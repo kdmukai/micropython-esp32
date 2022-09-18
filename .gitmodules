@@ -14,3 +14,6 @@
 	path = deps/usermods/uhashlib
 	url = https://github.com/diybitcoinhardware/uhashlib.git
 	branch = esp32s2-s3-compatibility
+[submodule "deps/usermods/micropython-camera-driver"]
+	path = deps/usermods/micropython-camera-driver
+	url = https://github.com/lemariva/micropython-camera-driver.git

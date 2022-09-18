@@ -55,3 +55,27 @@ target_compile_options(hashlib INTERFACE
 target_link_libraries(usermod INTERFACE hashlib)
 
 
+
+
+# Create an INTERFACE library for our C module.
+add_library(camera INTERFACE)
+
+# Add our source files to the lib
+target_sources(camera INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/micropython-camera-driver/src/modcamera.c
+)
+
+# Add the current directory as an include directory.
+target_include_directories(camera INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/micropython-camera-driver/src/
+    ${IDF_PATH}/components/esp32-camera/driver/include
+    ${IDF_PATH}/components/esp32-camera/driver/private_include
+    ${IDF_PATH}/components/esp32-camera/conversions/include
+    ${IDF_PATH}/components/esp32-camera/conversions/private_include
+    ${IDF_PATH}/components/esp32-camera/sensors/private_include
+)
+
+target_compile_definitions(camera INTERFACE)
+
+# Link our INTERFACE library to the usermod target.
+target_link_libraries(usermod INTERFACE camera)

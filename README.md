@@ -26,14 +26,14 @@ ln -s deps/embit/src/embit deps/lv_micropython/ports/esp32/modules/embit
 ```
 
 
-## Build the custom MicroPython firmware
-Build and run the Docker container that will be configured to build the firmware
+## Build and run the Docker container
 ```bash
 docker-compose build
 docker-compose up
 ```
 
 Run the `container_bash.sh` script to get a shell prompt inside the container (you may need to edit the container's name in the script).
+
 
 ## Continue configuration within the container
 ```bash
@@ -51,40 +51,15 @@ CONFIG_ETH_ENABLED=n
 CONFIG_ETH_USE_SPI_ETHERNET=n
 ```
 
-### Expand app partition when necessary
-If your compilation fails with something like:
-```
-Error: app partition is too small for binary micropython.bin size 0x1f28d0:
-  - Part 'factory' 0/0 @ 0x10000 size 0x1f0000 (overflow 0x28d0)
-```
-
-You'll need to alter the partition sizes for your target board.
-
-Copy of `partitions-16MiB.csv` to `partitions-16MiB-lvgl.csv` and make the following changes:
-
-* Expand the `factory` partition from `0x1F0000` to `0x2F0000`.
-* Shift the next partition's Offset by the same amount: from `0x200000` to `0x300000`.
-* Reduce the size of the "vfs" partition by the same amount: from `0xE00000` to `0xD00000`.
-
-```
-factory,  app,  factory, 0x10000, 0x2F0000,
-vfs,      data, fat,     0x300000, 0xD00000,
-```
-
-Then configure the board to use your new partitions:
-```
-CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-lvgl.csv"
-```
 
 ### Compile the firmware for the target board
 Now we can compile the custom firmware:
 ```bash
-
-# Targeting the GENERIC_S2 board
+# Targeting the SAOLA_1R board
 # Note: we build to a dir inside the container (instead of the shared /code dir) because otherwise
 #   the compiler runs significantly slower.
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S2 BUILD=/root/build-generic_s2 USER_C_MODULES=/code/deps/usermods/micropython.cmake
-mkdir -p /code/build/generic_s2
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=SAOLA_1R BUILD=/root/build-saola_1r USER_C_MODULES=/code/deps/usermods/micropython.cmake
+mkdir -p /code/build/saola_1r
 cp build-generic_s2/bootloader/bootloader.bin /code/build/generic_s2/.
 cp build-generic_s2/partition_table/partition-table.bin /code/build/generic_s2/.
 cp build-generic_s2/micropython.bin /code/build/generic_s2/.
@@ -171,6 +146,41 @@ ampy -p /dev/tty.usbmodem1234561 run test.py
 ```
 
 
+
+## Misc MicroPython notes
+
+### Expand app partition when necessary
+If your compilation fails with something like:
+```
+Error: app partition is too small for binary micropython.bin size 0x1f28d0:
+  - Part 'factory' 0/0 @ 0x10000 size 0x1f0000 (overflow 0x28d0)
+```
+
+You'll need to alter the partition sizes for your target board. Here's a baseline partition table:
+```bash
+# Notes: the offset of the partition table itself is set in
+# $IDF_PATH/components/partition_table/Kconfig.projbuild.
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x6000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, 0x10000, 0x1F0000,
+vfs,      data, fat,     0x200000, 0xE00000,
+```
+
+We can create more room for the `factory` partition that contains the `app`:
+* Expand the `factory` partition from `0x1F0000` to `0x2F0000`.
+* Shift the next partition's Offset by the same amount: change `0x200000` to `0x300000`.
+* Reduce the size of the `vfs` partition by the same amount: change `0xE00000` to `0xD00000`.
+
+```
+factory,  app,  factory, 0x10000, 0x2F0000,
+vfs,      data, fat,     0x300000, 0xD00000,
+```
+
+Then configure the board to use your new partitions:
+```
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-lvgl.csv"
+```
 
 # Raspi RP2040
 In the Docker container:
