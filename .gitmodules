@@ -19,4 +19,4 @@
 	url = https://github.com/kdmukai/micropython-camera-driver.git
 [submodule "deps/usermods/quirc"]
 	path = deps/usermods/quirc
-	url = https://github.com/dlbeer/quirc.git
+	url = https://github.com/kdmukai/quirc.git

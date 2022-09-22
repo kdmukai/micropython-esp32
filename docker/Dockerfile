@@ -79,4 +79,3 @@ WORKDIR /root
 # Set up the interactive bash shell to our liking
 COPY docker/bashrc /root/.bashrc
 
-WORKDIR /code/deps/lv_micropython/ports/esp32

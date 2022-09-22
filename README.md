@@ -65,6 +65,12 @@ cp build-generic_s2/partition_table/partition-table.bin /code/build/generic_s2/.
 cp build-generic_s2/micropython.bin /code/build/generic_s2/.
 ```
 
+GENERIC_S3
+```
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S3 BUILD=/root/build-generic_s3 USER_C_MODULES=/code/deps/usermods/micropython.cmake
+```
+
+
 Steps for FeatherS3 (esp32-S3)
 ```bash
 cp build-generic_s3_spiram/bootloader/bootloader.bin /code/feather_s3/.
