@@ -147,7 +147,7 @@ ampy -p /dev/tty.usbmodem1234561 run test.py
 
 
 
-## Misc MicroPython notes
+## Misc ESP32 notes
 
 ### Expand app partition when necessary
 If your compilation fails with something like:
@@ -169,8 +169,8 @@ vfs,      data, fat,     0x200000, 0xE00000,
 
 We can create more room for the `factory` partition that contains the `app`:
 * Expand the `factory` partition from `0x1F0000` to `0x2F0000`.
-* Shift the next partition's Offset by the same amount: change `0x200000` to `0x300000`.
-* Reduce the size of the `vfs` partition by the same amount: change `0xE00000` to `0xD00000`.
+* Shift the next partition's offset (4th col) by the same amount: change `0x200000` to `0x300000`.
+* Reduce the size (5th col) of the `vfs` partition by the same amount: change `0xE00000` to `0xD00000`.
 
 ```
 factory,  app,  factory, 0x10000, 0x2F0000,
@@ -179,8 +179,9 @@ vfs,      data, fat,     0x300000, 0xD00000,
 
 Then configure the board to use your new partitions:
 ```
-CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-lvgl.csv"
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-my_version.csv"
 ```
+
 
 # Raspi RP2040
 In the Docker container:

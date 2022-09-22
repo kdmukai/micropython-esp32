@@ -17,3 +17,6 @@
 [submodule "deps/usermods/micropython-camera-driver"]
 	path = deps/usermods/micropython-camera-driver
 	url = https://github.com/kdmukai/micropython-camera-driver.git
+[submodule "deps/usermods/quirc"]
+	path = deps/usermods/quirc
+	url = https://github.com/dlbeer/quirc.git
