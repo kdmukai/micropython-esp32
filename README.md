@@ -25,6 +25,11 @@ rm -rf deps/embit/src/embit/util
 ln -s deps/embit/src/embit deps/lv_micropython/ports/esp32/modules/embit
 ```
 
+## Create a python3 virtualenv and install dependencies
+```
+pip install -r requirements.txt
+```
+
 
 ## Build and run the Docker container
 ```bash
@@ -68,6 +73,20 @@ cp build-generic_s2/micropython.bin /code/build/generic_s2/.
 GENERIC_S3
 ```
 make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S3 BUILD=/root/build-generic_s3 USER_C_MODULES=/code/deps/usermods/micropython.cmake
+mkdir -p /code/generic_s3
+cp /root/build-generic_s3/bootloader/bootloader.bin /code/generic_s3/.
+cp /root/build-generic_s3/partition_table/partition-table.bin /code/generic_s3/.
+cp /root/build-generic_s3/micropython.bin /code/generic_s3/.
+```
+
+
+S3-DEVKITC-1 (N8R8)
+```
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=S3_DEVKITC_1_N8R8 BUILD=/root/build-s3_devkitc_1_n8r8 USER_C_MODULES=/code/deps/usermods/micropython.cmake
+mkdir -p /code/build/s3_devkitc_1_n8r8
+cp /root/build-s3_devkitc_1_n8r8/bootloader/bootloader.bin /code/build/s3_devkitc_1_n8r8/.
+cp /root/build-s3_devkitc_1_n8r8/partition_table/partition-table.bin /code/build/s3_devkitc_1_n8r8/.
+cp /root/build-s3_devkitc_1_n8r8/micropython.bin /code/build/s3_devkitc_1_n8r8/.
 ```
 
 
@@ -108,15 +127,21 @@ ls /dev
 
 Write in the new firmware; the `write_flash` command is copied from the `idf.py` guidance above when compilation is completed.
 ```bash
-esptool.py --port /dev/tty.usbmodem01 erase_flash
+esptool.py -p /dev/tty.usbmodem01 erase_flash
 esptool.py -p /dev/tty.usbmodem01 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
+```
+
+### S3-DevKitC-1 (N8R8)
+```bash
+esptool.py -p /dev/tty.usbmodem1101 erase_flash
+esptool.py -p /dev/tty.usbmodem1101 -b 460800 --before default_reset --after no_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
 
 ### FeatherS3 (esp32-S3)
 ```
-esptool.py --port /dev/tty.usbmodem101 erase_flash
-esptool.py -p /dev/tty.usbmodem101 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
+esptool.py --port /dev/tty.usbmodem1101 erase_flash
+esptool.py -p /dev/tty.usbmodem1101 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
 ### Generic ESP-32 (WROOM, etc)
@@ -132,6 +157,8 @@ Once it's complete, press RST to reset the board to normal operations. It will r
 
 
 ## Interact with the board
+
+### `ampy`
 Install the `ampy` tool:
 ```bash
 pip install adafruit-ampy
@@ -149,6 +176,26 @@ ampy -p /dev/tty.usbmodem1234561 put embit
 
 # Run an arbitrary local python file on the ESP32
 ampy -p /dev/tty.usbmodem1234561 run test.py
+```
+
+
+### `mpremote`
+Offers similar features to `ampy` but also provides an interactive REPL option.
+
+```bash
+pip install mpremote
+```
+
+```bash
+# Run a local file on the device
+mpremote connect /dev/tty.usbmodem1234561 run demos/secp256k1_test.py
+mpremote connect /dev/tty.usbserial-110 run demos/secp256k1_test.py
+
+# Enter the interactive REPL
+mpremote connect /dev/tty.usbserial-110 repl
+
+# List files on the device
+mpremote connect /dev/tty.usbserial-110 ls
 ```
 
 
@@ -225,4 +272,62 @@ Get full firmware details:
 >>> import os
 >>> os.uname()
 (sysname='esp32', nodename='esp32', release='1.18.0', version='v1.18-4-g5c8f5b4ce-dirty on 2022-07-05', machine='FeatherS2 with ESP32-S2')
+```
+
+
+
+## Generate custom font
+```bash
+# bin format for dynamic includes
+lv_font_conv --font OpenSans-Semibold.ttf -r 0x00-0xFF --size 20 --format bin --bpp 4 --no-compress -o opensans_semibold_20.bin 
+
+# lvgl format to compile directly into firmware
+lv_font_conv --font OpenSans-Regular.ttf -r 0x20-0x7F --size 17 --format lvgl --bpp 3 -o opensans_regular_17.c  --force-fast-kern-format
+```
+
+
+Convert FontAwesome glyphs
+```python
+# Extract the list of chars in decimal:
+import inspect
+from seedsigner.gui.components import FontAwesomeIconConstants
+char_list = []
+for key, value in inspect.getmembers(FontAwesomeIconConstants):
+    if key.startswith("_"):
+        continue
+    char_list.append(ord(value))
+",".join([str(c) for c in char_list])
+
+# Also add the space char (32).
+```
+
+```bash
+lv_font_conv --font Font_Awesome_6_Free-Solid-900.otf -r 32,61703,61700,61701,61702,61488,61655,61657,61658,61656,61713,61752,62754,62755,62756,62757,62758,62759,62760,61459,61572,61724,61475,62073,61912,62212,43,61457,61481,62201,63449,61528,61640,61776,61841,61778,61777,61770,61553,61596,88  --size 22 --format bin --bpp 4 --no-compress -o fontawesome_22.bin
+
+lv_font_conv --font Font_Awesome_6_Free-Solid-900.otf -r 32,61703,61700,61701,61702,61488,61655,61657,61658,61656,61713,61752,62754,62755,62756,62757,62758,62759,62760,61459,61572,61724,61475,62073,61912,62212,43,61457,61481,62201,63449,61528,61640,61776,61841,61778,61777,61770,61553,61596,88  --size 24 --format bin --bpp 4 --no-compress -o fontawesome_24.bin
+
+lv_font_conv --font seedsigner-glyphs.otf -r 32,0xe900-0xe90d  --size 24 --format bin --bpp 4 --no-compress -o seedsigner_glyphs_24.bin
+
+lv_font_conv --font seedsigner-glyphs.otf -r 32,0xe900-0xe90d  --size 22 --format bin --bpp 4 --no-compress -o seedsigner_glyphs_22.bin
+
+lv_font_conv --font seedsigner-glyphs.otf -r 0xe90d  --size 100 --format bin --bpp 4 --no-compress -o bitcoin_logo_100.bin
+
+lv_font_conv --font seedsigner-glyphs.otf -r 0xe90d  --size 150 --format bin --bpp 4 --no-compress -o bitcoin_logo_150.bin
+
+
+```
+
+
+python3 ~/lv_micropython/lib/lv_bindings/lvgl/scripts/built_in_font/built_in_font_gen.py 
+
+
+
+Edit nano ~/lv_micropython/lib/lv_bindings/lv_conf.h 
+
+And add custom fonts:
+```
+/*Optionally declare custom fonts here.
+ *You can use these fonts as default font too and they will be available globally.
+ *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(opensans_regular_17) LV_FONT_DECLARE(opensans_semibold_20)
 ```
