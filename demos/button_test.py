@@ -24,23 +24,37 @@ fs_drv = lv.fs_drv_t()
 fs_driver.fs_register(fs_drv, 'S')
 
 # Load the font
-# myfont_cn = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
+myfont_cn = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
 
+"""
+    Pinouts for different boards:
+
+    ESP32-S3-DevKitC-1:
+        FSPID (11) = MOSI
+        mosi=11, clk=12, cs=10, dc=4, rst=5,
+
+    Unexpected Maker FeatherS3:
+        mosi=12, clk=6, cs=17, dc=14, rst=18,
+
+    Saola-1R:
+        mosi=11, clk=12, cs=10, dc=1, rst=2,
+"""
 disp = st7789(
-    # ESP32-S3-DevKitC-1:
-    # FSPID (11) = MOSI
-    # mosi=11, clk=12, cs=10, dc=4, rst=5,
-    # width=240, height=240, rot=ili9XXX.LANDSCAPE
-    # Unexpected Maker FeatherS3
-    mosi=12, clk=6, cs=17, dc=14, rst=18,
+    mosi=11, clk=12, cs=10, dc=1, rst=2,
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
+
+scr = lv.scr_act()
+scr.clean()
+
+scr.set_style_bg_color(lv.color_hex(0x000000), 0)
+scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
 
 EDGE_PADDING = 8
 COMPONENT_PADDING = 8
 
 ### Top Nav ###
-top_nav = lv.obj(lv.scr_act())
+top_nav = lv.obj(scr)
 top_nav.set_size(240, 48)
 top_nav.align(lv.ALIGN.TOP_LEFT, 0, 0)
 
@@ -56,12 +70,12 @@ label = lv.label(top_nav)
 label.set_text("Settings")
 label.center()
 label_style = lv.style_t()
-# label_style.set_text_font(myfont_cn)
+label_style.set_text_font(myfont_cn)
 # label_style.set_text_font(lv.font_montserrat_16)
 label_style.set_text_color(lv.color_hex(0xffffff))
 label.add_style(label_style, 0)
 
-obj = lv.btn(lv.scr_act())
+obj = lv.btn(scr)
 obj.set_size(240 - 2*EDGE_PADDING, 32)
 obj.add_flag(lv.obj.FLAG.SNAPPABLE)
 obj.center()

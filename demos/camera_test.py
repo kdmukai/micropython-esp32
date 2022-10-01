@@ -5,17 +5,24 @@ import ili9XXX
 from ili9XXX import st7789
 import fs_driver
 
+import time
+
 lv.init()
+
+time.sleep(0.1)
 
 # FS driver init
 fs_drv = lv.fs_drv_t()
 fs_driver.fs_register(fs_drv, 'S')
-opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")\
+opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
 
 disp = st7789(
     mosi=11, clk=12, cs=10, dc=1, rst=2,
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
+
+time.sleep(0.1)
+
 scr = lv.scr_act()
 scr.clean()
 
@@ -41,18 +48,6 @@ label.set_style_text_font(opensans_semibold_20, 0)
 label.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
 label.set_text("Camera Test")
 
-# Saola-1R wiring
-#camera.init(0, d0=35, d1=36, d2=37, d3=38, d4=39, d5=40, d6=41, d7=42,
-camera.init(0, d0=-1, d1=-1, d2=35, d3=36, d4=37, d5=38, d6=39, d7=30,
-            format=camera.JPEG, framesize=camera.FRAME_240X240, 
-            xclk_freq=camera.XCLK_10MHz,
-            href=4, vsync=3, reset=-1, pwdn=-1,
-            sioc=9, siod=8, xclk=6, pclk=5)
-
-camera.brightness(1)
-camera.mirror(1)
-camera.saturation(2)
-camera.contrast(2)
 
 img1 = lv.img(scr)
 img1.set_size(240, 192)
@@ -72,19 +67,56 @@ img_label.align(lv.ALIGN.BOTTOM_MID, 0, 0)
 img_label.set_style_text_color(lv.color_hex(0xffa500), 0)
 img_label.set_text("< cancel  |  proceed >")
 
+# Let LVGL finish updating before starting the camera(?)
+time.sleep(0.1)
+
+# Saola-1R wiring
+# sioc = SCL; siod = SDA
+camera.init(
+    0,
+    format=camera.JPEG,
+    framesize=camera.FRAME_240X240,
+    fb_location=camera.PSRAM,
+    xclk_freq=camera.XCLK_20MHz,
+    sioc=9,  # SCL
+    siod=8,  # SDA
+    vsync=7, href=6,
+    pclk=5, xclk=4,
+    d6=41, d7=42,
+    d4=39, d5=40,
+    d2=37, d3=38,
+    d0=35, d1=36,
+    reset=-1, pwdn=-1,  # not connected
+)
+
+camera.brightness(1)
+camera.mirror(1)
+camera.flip(1)
+camera.saturation(2)
+camera.contrast(2)
+
+
 try:
+    i = 0
     while True:
+        start = time.ticks_ms()
         buf = camera.capture()
-        image_data = lv.img_dsc_t({
-            'header': {
-                'always_zero': 0,
-                'w': 320,
-                'h': 240,
-            },
-            'data_size': len(buf),
-            'data': buf
-        })
-        img1.set_src(image_data)
+        # print(f"{i}: {len(buf)}")
+        if buf:
+            image_data = lv.img_dsc_t({
+                'header': {
+                    'always_zero': 0,
+                    'w': 240,
+                    'h': 240,
+                },
+                'data_size': len(buf),
+                'data': buf
+            })
+            img1.set_src(image_data)
+            i += 1
+            print(f"{time.ticks_ms() - start:3} ms")
+        else:
+            print("NO DATA")
 finally:
     camera.deinit()
 

@@ -65,9 +65,9 @@ Now we can compile the custom firmware:
 #   the compiler runs significantly slower.
 make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=SAOLA_1R BUILD=/root/build-saola_1r USER_C_MODULES=/code/deps/usermods/micropython.cmake
 mkdir -p /code/build/saola_1r
-cp build-generic_s2/bootloader/bootloader.bin /code/build/generic_s2/.
-cp build-generic_s2/partition_table/partition-table.bin /code/build/generic_s2/.
-cp build-generic_s2/micropython.bin /code/build/generic_s2/.
+cp /root/build-saola_1r/bootloader/bootloader.bin /code/build/saola_1r/.
+cp /root/build-saola_1r/partition_table/partition-table.bin /code/build/saola_1r/.
+cp /root/build-saola_1r/micropython.bin /code/build/saola_1r/.
 ```
 
 GENERIC_S3
@@ -90,11 +90,13 @@ cp /root/build-s3_devkitc_1_n8r8/micropython.bin /code/build/s3_devkitc_1_n8r8/.
 ```
 
 
-Steps for FeatherS3 (esp32-S3)
+Unexpected Maker FeatherS3
 ```bash
-cp build-generic_s3_spiram/bootloader/bootloader.bin /code/feather_s3/.
-cp build-generic_s3_spiram/partition_table/partition-table.bin /code/feather_s3/.
-cp build-generic_s3_spiram/micropython.bin /code/feather_s3/.
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=UM_FEATHERS3 BUILD=/root/build-um_feathers3 USER_C_MODULES=/code/deps/usermods/micropython.cmake
+mkdir -p /code/build/um_feathers3
+cp /root/build-um_feathers3/bootloader/bootloader.bin /code/build/um_feathers3/.
+cp /root/build-um_feathers3/partition_table/partition-table.bin /code/build/um_feathers3/.
+cp /root/build-um_feathers3/micropython.bin /code/build/um_feathers3/.
 ```
 
 Steps for Generic esp32 (WROOM, etc)
@@ -126,9 +128,11 @@ ls /dev
 ```
 
 Write in the new firmware; the `write_flash` command is copied from the `idf.py` guidance above when compilation is completed.
+
+### Saola-1R (S2 dev kit)
 ```bash
-esptool.py -p /dev/tty.usbmodem01 erase_flash
-esptool.py -p /dev/tty.usbmodem01 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
+esptool.py -p /dev/tty.usbserial-1110 erase_flash
+esptool.py -p /dev/tty.usbserial-1110 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
 ### S3-DevKitC-1 (N8R8)
