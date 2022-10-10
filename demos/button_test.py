@@ -81,6 +81,7 @@ obj.center()
 
 style = lv.style_t()
 style.set_bg_color(lv.color_hex(0xffa500))
+style.set_text_color(lv.color_hex(0x000000))
 style.set_pad_all(0)
 obj.add_style(style, 0)
 

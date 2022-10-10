@@ -1,5 +1,13 @@
 # MicroPython-esp32
-Create a custom MicroPython firmware for an ESP32 board with `secp256k1` compiled in.
+Create a custom MicroPython firmware that is Bitcoin-enabled (`secp256k1` compiled in, `embit` onboard) that initially targets the esp32-S2.
+
+Choose:
+* Begin testing things out immediately by downloading the pre-compiled firmware for the esp32-S2 Saola-1R dev board.
+* OR compile the firmware yourself following the steps below
+
+For now we assume you're working with the Saola-1R build described here:
+* [Instructions for assembling the Saola-1R kit](docs/saola_1r_build/README.md)
+
 
 ## Clone this repo and its dependencies
 ```bash
@@ -113,7 +121,8 @@ pip install adafruit-ampy
 ampy -p /dev/tty.usbserial-1110 ls
 
 # Transfer a file
-ampy -p /dev/tty.usbserial-1110 put blah.py
+ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
+ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
 
 # Transfer a whole directory
 ampy -p /dev/tty.usbserial-1110 put embit
