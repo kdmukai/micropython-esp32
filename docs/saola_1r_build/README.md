@@ -70,7 +70,7 @@ Wiping it with rubbing alcohol cleans it up:
 ## Wiring the ST7789 display
 The ST7789 display is integrated into the Waveshare LCD hat. The hat will sit on the 40-pin gpio adapter that we just mounted.
 
-The gpio adapter labels the hat's Raspberry Pi 40-pin connector. So we need to connect the raspi labeled pins to their Saola destination (in other words, you can ignore the "ST7789" column of this chart):
+The "RASPI GPIO" column corresponds with the pin labels on the gpio adapter. Connect the listed pins to their Saola destination (you can ignore the "ST7789" column of this chart):
 ```
 ST7789      RASPI GPIO      SAOLA
 ---------------------------------
@@ -110,6 +110,11 @@ Seat the LCD hat to test your work. Important notes:
 If you haven't already, write the custom Saola-1R firmware to the board. see: [instructions](/README.md#write-the-firmware-to-the-board)
 
 Also copy over the `/demo/fonts` to the root. see: [instructions](/README.md#interact-with-the-board)
+
+```bash
+ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
+ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
+```
 
 Then try running the `/demo/seedsigner_ui.py` test:
 ```bash
@@ -158,3 +163,79 @@ mpremote connect /dev/tty.usbserial-1110 run demos/button_test.py
 <img src="img/input_wiring_02.jpg" width="600">
 
 The orange center button should update its label based on the input it receives. Try up, down, left, right, center press, and Key1, Key2, Key3.
+
+---
+
+# Wiring the camera
+
+First: Do you need to wire the camera? If your project doesn't need it, skip it!
+
+Also: Camera performance in this build is very inconsistent and is still under R&D to work out improvements.
+
+But if you insist...
+
+<img src="img/camera_wiring_01.jpg" width="600">
+
+There are 16 wires to connect. The pin label on the module is a huge help!
+
+```
+OV2640      SAOLA
+-----------------
+3.3V        3V3
+GND         GND
+SIOC         9 (SCL)
+SIOD         8 (SDA)
+VSYNC        7
+HREF         6
+PCLK         5
+XCLK         4
+D9          42
+D8          41
+D7          40
+D6          39
+D5          38
+D4          37
+D3          36
+D2          35
+RET         (not connected)
+PWDN        (not connected)
+```
+
+We'll use two sets of 8x male-to-female jumper wires. Keep each group of eight connected to each other. Aside from `3V3` and `GND`, the rest of the connections on the Saola side are all next to each other in a group of six and a group of eight to make the wiring easier. Just take care that it's wired correctly on the camera side.
+
+<img src="img/camera_wiring_02.jpg" width="400">
+
+Try running `/demo/camera_test.py`:
+```bash
+mpremote connect /dev/tty.usbserial-1110 run demos/camera_test.py
+```
+
+If successful, you should see a live camera feed on the display with a stream of elapsed frame times in the console output:
+```
+  4 ms
+  3 ms
+165 ms
+  3 ms
+  4 ms
+166 ms
+  3 ms
+  4 ms
+```
+
+<img src="img/camera_wiring_03.jpg" width="600">
+
+
+## Camera caveats
+As mentioned above, this camera wiring still needs more R&D. Consider it very fragile and handle the jumper wires accordingly. Expect random intermittent failures.
+
+---
+
+# The build is complete!
+
+<img src="img/build_complete_01.jpg" width="600">
+
+Remember that the solderless breadboard is not very reliable. The next step would be to transfer your breadboard layout to a solderable protoboard for more reliable connections.
+
+<img src="img/build_complete_02.jpg" width="600">
+
+<img src="img/build_complete_03.jpg" width="400">

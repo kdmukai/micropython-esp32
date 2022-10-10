@@ -3,11 +3,15 @@ Create a custom MicroPython firmware that is Bitcoin-enabled (`secp256k1` compil
 
 Choose:
 * Begin testing things out immediately by downloading the pre-compiled firmware for the esp32-S2 Saola-1R dev board.
-* OR compile the firmware yourself following the steps below
+* OR compile the firmware yourself following the steps below.
 
 For now we assume you're working with the Saola-1R build described here:
 * [Instructions for assembling the Saola-1R kit](docs/saola_1r_build/README.md)
 
+
+---
+
+# Building the firmware
 
 ## Clone this repo and its dependencies
 ```bash
