@@ -32,13 +32,13 @@ git submodule update --init --recursive deps/usermods/secp256k1-embedded
 # embit needs some parts trimmed out of it
 rm -rf deps/embit/src/embit/liquid
 rm -rf deps/embit/src/embit/util
-
-# soft link embit inside lv_micropython
-ln -s deps/embit/src/embit deps/lv_micropython/ports/esp32/modules/embit
 ```
 
 ## Create a python3 virtualenv and install dependencies
 ```
+pip install virtualenv
+virtualenv .env
+source .env/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -59,10 +59,15 @@ make -C /code/deps/lv_micropython/mpy-cross
 
 cd /code/deps/lv_micropython/ports/esp32
 make submodules
+
+# soft link embit inside lv_micropython
+ln -s /code/deps/embit/src/embit /code/deps/lv_micropython/ports/esp32/modules/embit
 ```
 
 ### Configure board target for LVGL compatibility
-The `GENERIC_S2` and `SAOLA_1R` sdkconfigs have already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its `sdkconfig.board`:
+_Note: The Saola-1R and any "GENERIC_S2" board can skip this step since their sdkconfigs have already been updated for LVGL compatibility._
+
+Edit the definition of your S2 board in `lv_micropython/ports/esp32/boards` by updating its `sdkconfig.board`:
 ```
 CONFIG_ETH_ENABLED=n
 CONFIG_ETH_USE_SPI_ETHERNET=n
