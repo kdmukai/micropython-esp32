@@ -31,6 +31,16 @@ WORKDIR /root/home/esp/esp-idf/components
 RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
 
 WORKDIR /root
+
+# ----------------------------------------------------------------------------------------
+# Commented out the rest. I had been cloning repos and doing everything within Docker but
+# it was too cumbersome to make changes in dependent repos inside the container. Now
+# we keep the dependencies on the local machine but make them available to the container
+# so we can browse and edit the repos locally but still see the effect of those changes
+# when we build inside the container.
+# ----------------------------------------------------------------------------------------
+
+
 # Build MicroPython firmware from esixtyone's fork of lv_micropython w/his tweaks for esp32-S2
 # RUN git clone -b fix/esp32s2-build https://github.com/esixtyone/lv_micropython.git
 # WORKDIR /root/lv_micropython

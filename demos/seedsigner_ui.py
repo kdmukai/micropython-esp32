@@ -3,11 +3,34 @@ import lvgl as lv
 import ili9XXX
 from ili9XXX import st7789
 
+import usys as sys
+sys.path.append('') # See: https://github.com/micropython/micropython/issues/6419
+
+try:
+    script_path = __file__[:__file__.rfind('/')] if __file__.find('/') >= 0 else '.'
+except NameError:
+    script_path = ''
+
+import fs_driver
+# FS driver init
+fs_drv = lv.fs_drv_t()
+fs_driver.fs_register(fs_drv, 'S')
+
+FONT__OPEN_SANS__REGULAR__17 = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
+FONT__OPEN_SANS__SEMIBOLD__20 = lv.font_load("S:%s/opensans_semibold_20.bin" % script_path)
+
+
 disp = st7789(
     # Saola-1R
     mosi=11, clk=12, cs=10, dc=1, rst=2,
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
+
+scr = lv.scr_act()
+scr.clean()
+
+scr.set_style_bg_color(lv.color_hex(0x000000), 0)
+scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
 
 EDGE_PADDING = 8
 COMPONENT_PADDING = 8
@@ -26,7 +49,7 @@ bg.add_style(style, 0)
 """
 
 ### Top Nav ###
-top_nav = lv.obj(lv.scr_act())
+top_nav = lv.obj(scr)
 top_nav.set_size(240, 48)
 top_nav.align(lv.ALIGN.TOP_LEFT, 0, 0)
 
@@ -35,20 +58,20 @@ style.init()
 style.set_pad_all(0)
 style.set_border_width(0)
 style.set_radius(0)
-style.set_bg_color(lv.color_hex(0x0000ff))
+style.set_bg_color(lv.color_hex(0x000000))
 top_nav.add_style(style, 0)
 
 label = lv.label(top_nav)
 label.set_text("Settings")
 label.center()
 label_style = lv.style_t()
-label_style.set_text_font(lv.font_montserrat_16)
+label_style.set_text_font(FONT__OPEN_SANS__SEMIBOLD__20)
 label_style.set_text_color(lv.color_hex(0xffffff))
 label.add_style(label_style, 0)
 
 
 ### Button List ###
-cont_col = lv.obj(lv.scr_act())
+cont_col = lv.obj(scr)
 cont_col.set_size(240, 240 - top_nav.get_height() - 48)
 cont_col.align_to(top_nav, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
 cont_col.set_flex_flow(lv.FLEX_FLOW.COLUMN)
@@ -79,6 +102,7 @@ for i in range(10):
     style = lv.style_t()
     style.set_bg_color(lv.color_hex(0x2c2c2c))
     style.set_pad_all(0)
+    style.set_text_font(FONT__OPEN_SANS__REGULAR__17)
     obj.add_style(style, 0)
 
     label = lv.label(obj)

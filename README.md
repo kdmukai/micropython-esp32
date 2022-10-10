@@ -50,7 +50,7 @@ make submodules
 ```
 
 ### Configure board target for LVGL compatibility
-The `boards/GENERIC_S2` sdkconfig has already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its `sdkconfig.board`:
+The `GENERIC_S2` and `SAOLA_1R` sdkconfigs have already been updated for LVGL compatibility. Edit the definition of any other S2 board by updating its `sdkconfig.board`:
 ```
 CONFIG_ETH_ENABLED=n
 CONFIG_ETH_USE_SPI_ETHERNET=n
@@ -70,44 +70,6 @@ cp /root/build-saola_1r/partition_table/partition-table.bin /code/build/saola_1r
 cp /root/build-saola_1r/micropython.bin /code/build/saola_1r/.
 ```
 
-GENERIC_S3
-```
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=GENERIC_S3 BUILD=/root/build-generic_s3 USER_C_MODULES=/code/deps/usermods/micropython.cmake
-mkdir -p /code/generic_s3
-cp /root/build-generic_s3/bootloader/bootloader.bin /code/generic_s3/.
-cp /root/build-generic_s3/partition_table/partition-table.bin /code/generic_s3/.
-cp /root/build-generic_s3/micropython.bin /code/generic_s3/.
-```
-
-
-S3-DEVKITC-1 (N8R8)
-```
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=S3_DEVKITC_1_N8R8 BUILD=/root/build-s3_devkitc_1_n8r8 USER_C_MODULES=/code/deps/usermods/micropython.cmake
-mkdir -p /code/build/s3_devkitc_1_n8r8
-cp /root/build-s3_devkitc_1_n8r8/bootloader/bootloader.bin /code/build/s3_devkitc_1_n8r8/.
-cp /root/build-s3_devkitc_1_n8r8/partition_table/partition-table.bin /code/build/s3_devkitc_1_n8r8/.
-cp /root/build-s3_devkitc_1_n8r8/micropython.bin /code/build/s3_devkitc_1_n8r8/.
-```
-
-
-Unexpected Maker FeatherS3
-```bash
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=UM_FEATHERS3 BUILD=/root/build-um_feathers3 USER_C_MODULES=/code/deps/usermods/micropython.cmake
-mkdir -p /code/build/um_feathers3
-cp /root/build-um_feathers3/bootloader/bootloader.bin /code/build/um_feathers3/.
-cp /root/build-um_feathers3/partition_table/partition-table.bin /code/build/um_feathers3/.
-cp /root/build-um_feathers3/micropython.bin /code/build/um_feathers3/.
-```
-
-Steps for Generic esp32 (WROOM, etc)
-```bash
-cp build-generic/bootloader/bootloader.bin /code/generic_esp32/.
-cp build-generic/partition_table/partition-table.bin /code/generic_esp32/.
-cp build-generic/micropython.bin /code/generic_esp32/.
-```
-
-
-
 
 ## Write the firmware to the board
 see: https://docs.micropython.org/en/latest/esp32/tutorial/intro.html#esp32-intro
@@ -119,15 +81,15 @@ pip install esptool
 
 Put the board into bootloader update mode:
 * Press and hold BOOT
-* Press RST and release
+* Click RST and release
 * Release BOOT
 
-The board's port name should either be `tty.usbmodem01` or `cu.usbmodem01` (older(?) macOS). Confirm with:
+The board's port name should be something like `/dev/tty.usbserial-1110`. Confirm with:
 ```
 ls /dev
 ```
 
-Write in the new firmware; the `write_flash` command is copied from the `idf.py` guidance above when compilation is completed.
+Write the new firmware; the `write_flash` command is copied from the `idf.py` guidance above when compilation is completed.
 
 ### Saola-1R (S2 dev kit)
 ```bash
@@ -135,29 +97,7 @@ esptool.py -p /dev/tty.usbserial-1110 erase_flash
 esptool.py -p /dev/tty.usbserial-1110 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
 
-### S3-DevKitC-1 (N8R8)
-```bash
-esptool.py -p /dev/tty.usbmodem1101 erase_flash
-esptool.py -p /dev/tty.usbmodem1101 -b 460800 --before default_reset --after no_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
-```
-
-
-### FeatherS3 (esp32-S3)
-```
-esptool.py --port /dev/tty.usbmodem1101 erase_flash
-esptool.py -p /dev/tty.usbmodem1101 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
-```
-
-### Generic ESP-32 (WROOM, etc)
-* Press and hold 100
-* Press EN and release
-* Release 100
-```
-esptool.py --port /dev/tty.usbserial-0001 erase_flash
-esptool.py -p /dev/tty.usbserial-0001 -b 460800 --before default_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 40m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
-```
-
-Once it's complete, press RST to reset the board to normal operations. It will remount itself with a different name (e.g. `/dev/tty.usbmodem1234561`).
+Once it's complete, power cycle or press RST to reset the board to normal operations. It will/may remount itself with a different name.
 
 
 ## Interact with the board
@@ -170,21 +110,21 @@ pip install adafruit-ampy
 
 ```bash
 # List the files on the board
-ampy -p /dev/tty.usbmodem1234561 ls
+ampy -p /dev/tty.usbserial-1110 ls
 
 # Transfer a file
-ampy -p /dev/tty.usbmodem1234561 put blah.py
+ampy -p /dev/tty.usbserial-1110 put blah.py
 
 # Transfer a whole directory
-ampy -p /dev/tty.usbmodem1234561 put embit
+ampy -p /dev/tty.usbserial-1110 put embit
 
-# Run an arbitrary local python file on the ESP32
-ampy -p /dev/tty.usbmodem1234561 run test.py
+# Run an arbitrary local python file on the ESP32 (not recommended; use mpremote -- see below)
+ampy -p /dev/tty.usbserial-1110 run test.py
 ```
 
 
 ### `mpremote`
-Offers similar features to `ampy` but also provides an interactive REPL option.
+Offers similar features to `ampy` but also provides an interactive REPL option. Runs local scripts more reliably.
 
 ```bash
 pip install mpremote
@@ -192,14 +132,13 @@ pip install mpremote
 
 ```bash
 # Run a local file on the device
-mpremote connect /dev/tty.usbmodem1234561 run demos/secp256k1_test.py
-mpremote connect /dev/tty.usbserial-110 run demos/secp256k1_test.py
+mpremote connect /dev/tty.usbserial-1110 run demos/secp256k1_test.py
 
 # Enter the interactive REPL
-mpremote connect /dev/tty.usbserial-110 repl
+mpremote connect /dev/tty.usbserial-1110 repl
 
 # List files on the device
-mpremote connect /dev/tty.usbserial-110 ls
+mpremote connect /dev/tty.usbserial-1110 ls
 ```
 
 
@@ -241,6 +180,8 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-16MiB-my_version.csv"
 
 
 # Raspi RP2040
+(Have not seriously pursued RP2040 support; notes here are to return to later)
+
 In the Docker container:
 ```bash
 cd /root/micropython/ports/rp2
@@ -263,6 +204,16 @@ ampy -p /dev/tty.usbmodem01 run test.py
 ```
 
 
+# Generic Linux
+(Have not seriously pursued Linux support; notes here are to return to later)
+
+Follow the instructions for the [Unix (Linux) port](https://github.com/esixtyone/lv_micropython/tree/ad12fa45de530db806d8193d887ccf1e75f81d9f#unix-linux-port).
+
+```bash
+make -C ports/unix USER_C_MODULES=/code/deps/usermods/micropython.cmake
+```
+
+
 # Random MicroPython notes
 Get the platform:
 ```python
@@ -281,6 +232,8 @@ Get full firmware details:
 
 
 ## Generate custom font
+see: https://github.com/lvgl/lv_font_conv
+
 ```bash
 # bin format for dynamic includes
 lv_font_conv --font OpenSans-Semibold.ttf -r 0x00-0xFF --size 20 --format bin --bpp 4 --no-compress -o opensans_semibold_20.bin 
@@ -289,8 +242,7 @@ lv_font_conv --font OpenSans-Semibold.ttf -r 0x00-0xFF --size 20 --format bin --
 lv_font_conv --font OpenSans-Regular.ttf -r 0x20-0x7F --size 17 --format lvgl --bpp 3 -o opensans_regular_17.c  --force-fast-kern-format
 ```
 
-
-Convert FontAwesome glyphs
+### Convert FontAwesome glyphs
 ```python
 # Extract the list of chars in decimal:
 import inspect
@@ -324,14 +276,3 @@ lv_font_conv --font seedsigner-glyphs.otf -r 0xe90d  --size 150 --format bin --b
 
 python3 ~/lv_micropython/lib/lv_bindings/lvgl/scripts/built_in_font/built_in_font_gen.py 
 
-
-
-Edit nano ~/lv_micropython/lib/lv_bindings/lv_conf.h 
-
-And add custom fonts:
-```
-/*Optionally declare custom fonts here.
- *You can use these fonts as default font too and they will be available globally.
- *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
-#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(opensans_regular_17) LV_FONT_DECLARE(opensans_semibold_20)
-```
