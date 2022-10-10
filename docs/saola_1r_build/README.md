@@ -107,7 +107,9 @@ Seat the LCD hat to test your work. Important notes:
 
 <img src="img/st7789_wiring_04.jpg" width="600">
 
-If you haven't already, write the custom Saola-1R firmware to the board. see: [instructions](/README.md#write-the-firmware-to-the-board)
+If you haven't already, write the custom Saola-1R firmware to the board. You can download the [precompiled Saola-1R firmware](/demos/precompiled) or do the build process.
+
+Instructions for writing the firmware to the board are [here](/README.md#write-the-firmware-to-the-board).
 
 Also copy over the `/demo/fonts` to the root. see: [instructions](/README.md#interact-with-the-board)
 
