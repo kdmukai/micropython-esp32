@@ -111,14 +111,14 @@ If you haven't already, write the custom Saola-1R firmware to the board. You can
 
 Instructions for writing the firmware to the board are [here](/README.md#write-the-firmware-to-the-board).
 
-Also copy over the `/demo/fonts` to the root.
+Also copy over the `/demo/fonts` to the board:
 
 ```bash
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
 ```
 
-_see: [instructions](/README.md#interact-with-the-board) if you haven't already installed `ampy`._
+_see: [instructions](/README.md#interact-with-the-board) if you haven't already installed `ampy` or `mpremote`._
 
 Then try running the `/demo/seedsigner_ui.py` test:
 ```bash
