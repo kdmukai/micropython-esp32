@@ -21,6 +21,21 @@ Solderless breadboards are nice for quick prototyping but their internal grip me
 
 ---
 
+## Load firmware and test dev board
+Before wiring anything, you can load the custom firmware to the dev board and run an initial command line-only test.
+
+Download the [precompiled Saola-1R firmware](/demos/precompiled) or do the full build process yourself.
+
+Instructions for writing the firmware to the board are [here](/README.md#write-the-firmware-to-the-board).
+
+Follow the [instructions](/README.md#interact-with-the-board) to install `ampy` and `mpremote` on your local machine.
+
+Run the `secp256k1` test:
+```bash
+mpremote connect /dev/tty.usbserial-1110 run demos/secp256k1_test.py
+```
+
+
 ## Placing the Saola-1R
 <img src="img/esp32-s2_saola1-pinout.jpg" width="600">
 
@@ -107,18 +122,12 @@ Seat the LCD hat to test your work. Important notes:
 
 <img src="img/st7789_wiring_04.jpg" width="600">
 
-If you haven't already, write the custom Saola-1R firmware to the board. You can download the [precompiled Saola-1R firmware](/demos/precompiled) or do the build process.
-
-Instructions for writing the firmware to the board are [here](/README.md#write-the-firmware-to-the-board).
-
-Also copy over the `/demo/fonts` to the board:
+Copy the `/demo/fonts` to the board:
 
 ```bash
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
 ```
-
-_see: [instructions](/README.md#interact-with-the-board) if you haven't already installed `ampy` or `mpremote`._
 
 Then try running the `/demo/seedsigner_ui.py` test:
 ```bash

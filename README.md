@@ -23,6 +23,7 @@ git submodule update --init
 
 # And within lv_micropython, recursively clone the esixtyone fork of lv_bindings
 cd deps/lv_micropython
+git checkout fix/esp32s2-build
 git submodule update --init --recursive lib/lv_bindings
 
 # Recursively clone secp256k1
