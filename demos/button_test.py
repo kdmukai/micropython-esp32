@@ -24,7 +24,7 @@ fs_drv = lv.fs_drv_t()
 fs_driver.fs_register(fs_drv, 'S')
 
 # Load the font
-myfont_cn = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
+opensans_regular_17 = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
 
 """
     Pinouts for different boards:
@@ -70,7 +70,7 @@ label = lv.label(top_nav)
 label.set_text("Settings")
 label.center()
 label_style = lv.style_t()
-label_style.set_text_font(myfont_cn)
+label_style.set_text_font(opensans_regular_17)
 label_style.set_text_color(lv.color_hex(0xffffff))
 label.add_style(label_style, 0)
 
