@@ -8,7 +8,9 @@ import machine
 import os
 import time
 
-from embit import bip39, bip32, script
+from embit.bip39 import mnemonic_from_bytes, mnemonic_to_seed
+from embit.bip32 import HDKey
+from embit.script import p2wpkh, p2sh, p2tr
 
 
 
@@ -17,9 +19,8 @@ NESTED_SEGWIT = "m/49'/0'/0'"
 TAPROOT = "m/86'/0'/0'"
 
 
-def xpub_from_mnemonic(mnemonic, derivation_path):
-    seed = bip39.mnemonic_to_seed(mnemonic)
-    root = bip32.HDKey.from_seed(seed)
+def xpub_from_bytes(entropy, derivation_path):
+    root = HDKey.from_seed(entropy)
     xprv = root.derive(derivation_path)
     return xprv.to_public()
 
@@ -29,13 +30,13 @@ def generate_address(xpub, derivation_path, index: int):
     pubkey = xpub.derive([0,index]).key
 
     if derivation_path == NATIVE_SEGWIT:
-        return script.p2wpkh(pubkey).address()
+        return p2wpkh(pubkey).address()
 
     elif derivation_path == NESTED_SEGWIT:
-        return script.p2sh(script.p2wpkh(pubkey)).address()
+        return p2sh(p2wpkh(pubkey)).address()
     
     elif derivation_path == TAPROOT:
-        return script.p2tr(pubkey).address()
+        return p2tr(pubkey).address()
 
 
 # FS driver init
@@ -87,14 +88,15 @@ disp = st7789(
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
-scr = lv.scr_act()
+scr = lv.obj()
 scr.set_style_bg_color(lv.color_hex(0xFFFFFF), 0)
 scr.set_style_bg_opa(lv.OPA.COVER, 0)
 scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
+lv.scr_load(scr)
 
 # Generate a random 12-word mnemonic
 seed_bytes = os.urandom(16)
-mnemonic = bip39.mnemonic_from_bytes(seed_bytes)
+mnemonic = mnemonic_from_bytes(seed_bytes)
 print(mnemonic)
 
 mnemonic_left = lv.label(scr)
@@ -115,75 +117,55 @@ for index in range(6, 12):
     text += f"{index+1}: {mnemonic.split()[index]}\n"
 mnemonic_right.set_text(text)
 
-instructions = lv.label(scr)
-instructions.set_style_text_font(opensans_regular_17, 0)
-instructions.align(lv.ALIGN.BOTTOM_MID, 0, -5)
-instructions.set_style_text_color(lv.color_hex(0x484848), 0)
-instructions.set_text("(click to continue)")
+# Set up a second screen obj
+print("setting up second screen")
+qr_scr = lv.obj()
 
-while True:
-    if joy_press.value() == 0:
-        break
-    time.sleep(0.05)
+qr = lv.qrcode(qr_scr, 180, lv.color_hex(0x000000), lv.color_hex(0xFFFFFF))
+qr.align(lv.ALIGN.TOP_MID, 0, 0)
+qr.set_style_border_color(lv.color_hex(0xffffff), 0)
+qr.set_style_border_width(5, 0)
 
-# clear the screen
-bg = lv.obj(lv.scr_act())
-bg.set_size(240, 240)
-bg.align(lv.ALIGN.TOP_LEFT, 0, 0)
-style = lv.style_t()
-style.set_bg_opa(lv.OPA.COVER)
-style.set_bg_color(lv.color_hex(0xffffff))
-style.set_border_width(0)
-style.set_radius(0)
-bg.add_style(style, lv.STATE.DEFAULT | lv.PART.MAIN)
-
-loading = lv.label(lv.scr_act())
-loading.set_style_text_font(opensans_semibold_20, 0)
-loading.align(lv.ALIGN.CENTER, 0, 0)
-loading.set_style_text_color(lv.color_hex(0x484848), 0)
-loading.set_text("loading QR\ngenerator...")
-
-
-xpubs = [
-    {
-        "name": "Segwit",
-        "xpub": xpub_from_mnemonic(mnemonic, NATIVE_SEGWIT),
-        "derivation_path": NATIVE_SEGWIT,
-    },
-    {
-        "name": "Nested segwit",
-        "xpub": xpub_from_mnemonic(mnemonic, NESTED_SEGWIT),
-        "derivation_path": NESTED_SEGWIT,
-    },
-    {
-        "name": "Taproot",
-        "xpub": xpub_from_mnemonic(mnemonic, TAPROOT),
-        "derivation_path": TAPROOT,
-    },
-]
-
-cur_xpub_index = 0
-cur_xpub = xpubs[cur_xpub_index]
-cur_addr_index = 0
-
-qr = lv.qrcode(scr, 180, lv.color_hex(0x000000), lv.color_hex(0xFFFFFF))
-qr.align(lv.ALIGN.TOP_MID, 0, 5)
-
-addr_type_label = lv.label(scr)
+addr_type_label = lv.label(qr_scr)
 addr_type_label.set_width(240)
-addr_type_label.align_to(qr, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+addr_type_label.align_to(qr, lv.ALIGN.OUT_BOTTOM_MID, 0, -5)
 addr_type_label.set_text("")
 addr_type_label.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
 addr_type_label.set_style_text_font(opensans_semibold_20, 0)
 addr_type_label.set_style_text_color(lv.color_hex(0x000000), 0)
 
-addr_label = lv.label(scr)
+addr_label = lv.label(qr_scr)
 addr_label.set_width(240)
 addr_label.align_to(addr_type_label, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
 addr_label.set_text("")
 addr_label.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
 addr_label.set_style_text_font(opensans_semibold_20, 0)
 addr_label.set_style_text_color(lv.color_hex(0x0000ff), 0)
+
+start = time.ticks_ms()
+xpubs = [
+    {
+        "name": "Segwit",
+        "xpub": xpub_from_bytes(seed_bytes, NATIVE_SEGWIT),
+        "derivation_path": NATIVE_SEGWIT,
+    },
+    {
+        "name": "Nested segwit",
+        "xpub": xpub_from_bytes(seed_bytes, NESTED_SEGWIT),
+        "derivation_path": NESTED_SEGWIT,
+    },
+    {
+        "name": "Taproot",
+        "xpub": xpub_from_bytes(seed_bytes, TAPROOT),
+        "derivation_path": TAPROOT,
+    },
+]
+print(f"Setting up xpubs: {time.ticks_ms() - start}ms")
+start = time.ticks_ms()
+
+cur_xpub_index = 0
+cur_xpub = xpubs[cur_xpub_index]
+cur_addr_index = 0
 
 def render_addr_qrcode():
     addr = generate_address(xpub=cur_xpub["xpub"], derivation_path=cur_xpub["derivation_path"], index=cur_addr_index)
@@ -195,6 +177,25 @@ def render_addr_qrcode():
     return addr
 
 render_addr_qrcode()
+print(f"Rendering first QR code offscreen: {time.ticks_ms() - start}ms")
+
+print("done with second screen")
+
+# Now that background processing is done, enable continue
+instructions = lv.label(scr)
+instructions.set_style_text_font(opensans_regular_17, 0)
+instructions.align(lv.ALIGN.BOTTOM_MID, 0, -5)
+instructions.set_style_text_color(lv.color_hex(0x484848), 0)
+instructions.set_text("(click to continue)")
+
+
+while True:
+    if joy_press.value() == 0:
+        break
+    time.sleep(0.05)
+
+# Make the second screen the active screen now
+lv.scr_load(qr_scr)
 
 
 while True:
