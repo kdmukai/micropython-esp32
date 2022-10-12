@@ -97,9 +97,14 @@ flip_results.set_style_text_color(lv.color_hex(0x000000), 0)
 flip_results.set_text("")
 
 instructions = lv.label(scr)
-instructions.align(lv.ALIGN.BOTTOM_MID, 0, -5)
 instructions.set_style_text_font(opensans_regular_17, 0)
-instructions.set_text("UP for heads; DOWN for tails")
+instructions.set_text("LEFT to delete")
+instructions.align(lv.ALIGN.BOTTOM_MID, 0, -5)
+
+instructions2 = lv.label(scr)
+instructions2.set_style_text_font(opensans_regular_17, 0)
+instructions2.set_text("UP for heads; DOWN for tails")
+instructions2.align_to(instructions, lv.ALIGN.OUT_TOP_MID, 0, 0)
 
 flips = ""
 
