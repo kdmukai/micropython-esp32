@@ -77,7 +77,7 @@ camera.init(
     format=camera.JPEG,
     framesize=camera.FRAME_240X240,
     fb_location=camera.PSRAM,
-    xclk_freq=camera.XCLK_20MHz,
+    xclk_freq=camera.XCLK_10MHz,
     sioc=9,  # SCL
     siod=8,  # SDA
     vsync=7, href=6,
