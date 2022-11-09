@@ -32,6 +32,11 @@ RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
 
 WORKDIR /root
 
+# Additional utilities
+RUN apt install -y rsync
+COPY docker/compile.sh compile.sh
+RUN chmod +x compile.sh
+
 # ----------------------------------------------------------------------------------------
 # Commented out the rest. I had been cloning repos and doing everything within Docker but
 # it was too cumbersome to make changes in dependent repos inside the container. Now
