@@ -41,10 +41,27 @@ This python package is a port of the exisiting [SparkFun DE2120 Arduino Library]
 #-----------------------------------------------------------------------------------
 
 import time
+from time import sleep
 from machine import UART
 
 
+import lvgl as lv
+import ili9XXX
+from ili9XXX import st7789
+import fs_driver
+
 _DEFAULT_NAME = "DE2120 Barcode Scanner"
+
+lv.init()
+
+time.sleep(0.1)
+
+# FS driver init
+fs_drv = lv.fs_drv_t()
+fs_driver.fs_register(fs_drv, 'S')
+opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
+FONT__OPEN_SANS__REGULAR__17 = lv.font_load("S:/opensans_regular_17.bin")
+
 
 class DE2120BarcodeScanner(object):
     """
@@ -296,7 +313,7 @@ class DE2120BarcodeScanner(object):
         # Use encode() to turn string into bytes
         self.hard_port.write(command_string.encode())
 
-        sleep(0.01)
+        sleep(1)
         
         incoming = self.hard_port.read()
 	
@@ -711,10 +728,47 @@ scan_buffer = ""
 # my_scanner.enable_continuous_read()
 my_scanner.light_on()
 
+disp = st7789(
+    # Saola-1R
+    mosi=11, clk=12, cs=10, dc=13, rst=14,
+    width=240, height=240, rot=ili9XXX.LANDSCAPE
+)
+
+
+time.sleep(0.1)
+
+scr = lv.scr_act()
+scr.clean()
+
+scr.set_style_bg_color(lv.color_hex(0x000000), 0)
+scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
+
+### Top Nav ###
+top_nav = lv.obj(scr)
+top_nav.set_size(240, 80)
+top_nav.align(lv.ALIGN.CENTER, 0, 0)
+top_nav.set_style_bg_color(lv.color_hex(0x000000), 0)
+
+style = lv.style_t()
+style.init()
+style.set_pad_all(0)
+style.set_border_width(0)
+style.set_radius(0)
+top_nav.add_style(style, 0)
+
+label = lv.label(top_nav)
+label.center()
+# opensans_semibold_20
+# FONT__OPEN_SANS__REGULAR__17
+label.set_style_text_font(opensans_semibold_20, 0)
+label.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
+label.set_text("Camera Test")
+
 while True:
     scan_buffer = my_scanner.read_barcode()
     if scan_buffer:
         print("\nCode found: " + str(scan_buffer))
+        label.set_text(str(scan_buffer))
         scan_buffer = ""
     
     time.sleep(0.02)

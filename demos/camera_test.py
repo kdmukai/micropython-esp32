@@ -1,6 +1,6 @@
 
 import lvgl as lv
-import OV2640
+import camera
 import ili9XXX
 from ili9XXX import st7789
 import fs_driver
@@ -128,11 +128,11 @@ camera.init(
     reset=-1, pwdn=-1,  # not connected
 )
 
-camera.brightness(1)
-camera.mirror(1)
-camera.flip(1)
-camera.saturation(2)
-camera.contrast(2)
+# camera.brightness(1)
+# camera.mirror(1)
+# camera.flip(1)
+# camera.saturation(2)
+# camera.contrast(2)
 
 import sys
 try:
