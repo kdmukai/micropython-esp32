@@ -39,8 +39,13 @@ opensans_regular_17 = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
     Saola-1R:
         mosi=11, clk=12, cs=10, dc=1, rst=2,
 """
+# disp = st7789(
+#     mosi=11, clk=12, cs=10, dc=1, rst=2,
+#     width=240, height=240, rot=ili9XXX.LANDSCAPE
+# )
 disp = st7789(
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    # Saola-1R
+    mosi=11, clk=12, cs=10, dc=13, rst=14,
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
@@ -89,15 +94,15 @@ label = lv.label(obj)
 label.set_text("")
 label.center()
 
-key1 = machine.Pin(3, machine.Pin.IN, machine.Pin.PULL_UP)
-key2 = machine.Pin(34, machine.Pin.IN, machine.Pin.PULL_UP)
-key3 = machine.Pin(33, machine.Pin.IN, machine.Pin.PULL_UP)
+key1 = machine.Pin(2, machine.Pin.IN, machine.Pin.PULL_UP)
+key2 = machine.Pin(1, machine.Pin.IN, machine.Pin.PULL_UP)
+key3 = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_UP)
 
-joy_up = machine.Pin(13, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_down = machine.Pin(14, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_left = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_right = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_press = machine.Pin(17, machine.Pin.IN, machine.Pin.PULL_UP)
+joy_up = machine.Pin(6, machine.Pin.IN, machine.Pin.PULL_UP)
+joy_down = machine.Pin(4, machine.Pin.IN, machine.Pin.PULL_UP)
+joy_left = machine.Pin(7, machine.Pin.IN, machine.Pin.PULL_UP)
+joy_right = machine.Pin(3, machine.Pin.IN, machine.Pin.PULL_UP)
+joy_press = machine.Pin(5, machine.Pin.IN, machine.Pin.PULL_UP)
 
 buttons = [
     (key1, "KEY1"),

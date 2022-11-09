@@ -22,7 +22,7 @@ FONT__OPEN_SANS__SEMIBOLD__20 = lv.font_load("S:%s/opensans_semibold_20.bin" % s
 
 disp = st7789(
     # Saola-1R
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    mosi=11, clk=12, cs=10, dc=13, rst=14,
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
