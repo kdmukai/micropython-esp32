@@ -8,6 +8,10 @@ import machine
 import os
 import time
 
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
 from embit.bip39 import mnemonic_from_bytes, mnemonic_to_seed
 from embit.bip32 import HDKey
 from embit.script import p2wpkh, p2sh, p2tr
@@ -45,16 +49,23 @@ fs_driver.fs_register(fs_drv, 'S')
 opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
 opensans_regular_17 = lv.font_load("S:/opensans_regular_17.bin")
 
+lv.init()
 
-key1 = machine.Pin(3, machine.Pin.IN, machine.Pin.PULL_UP)
-key2 = machine.Pin(34, machine.Pin.IN, machine.Pin.PULL_UP)
-key3 = machine.Pin(33, machine.Pin.IN, machine.Pin.PULL_UP)
 
-joy_up = machine.Pin(13, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_down = machine.Pin(14, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_left = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_right = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_press = machine.Pin(17, machine.Pin.IN, machine.Pin.PULL_UP)
+disp = st7789(
+    **pins["st7789"],
+    width=240, height=240, rot=ili9XXX.LANDSCAPE,
+)
+
+key1 = machine.Pin(pins["buttons"]["key1"], machine.Pin.IN, machine.Pin.PULL_UP)
+key2 = machine.Pin(pins["buttons"]["key2"], machine.Pin.IN, machine.Pin.PULL_UP)
+key3 = machine.Pin(pins["buttons"]["key3"], machine.Pin.IN, machine.Pin.PULL_UP)
+
+joy_up = machine.Pin(pins["buttons"]["joy_up"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_down = machine.Pin(pins["buttons"]["joy_down"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_left = machine.Pin(pins["buttons"]["joy_left"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_right = machine.Pin(pins["buttons"]["joy_right"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_press = machine.Pin(pins["buttons"]["joy_press"], machine.Pin.IN, machine.Pin.PULL_UP)
 
 buttons = [
     (key1, "KEY1"),
@@ -66,27 +77,6 @@ buttons = [
     (joy_right, "RIGHT"),
     (joy_press, "PRESS"),
 ]
-
-
-lv.init()
-
-"""
-    Pinouts for different boards:
-
-    ESP32-S3-DevKitC-1:
-        FSPID (11) = MOSI
-        mosi=11, clk=12, cs=10, dc=4, rst=5,
-
-    Unexpected Maker FeatherS3:
-        mosi=12, clk=6, cs=17, dc=14, rst=18,
-
-    Saola-1R:
-        mosi=11, clk=12, cs=10, dc=1, rst=2,
-"""
-disp = st7789(
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
-    width=240, height=240, rot=ili9XXX.LANDSCAPE
-)
 
 scr = lv.obj()
 scr.set_style_bg_color(lv.color_hex(0xFFFFFF), 0)
@@ -163,8 +153,8 @@ xpubs = [
 print(f"Setting up xpubs: {time.ticks_ms() - start}ms")
 start = time.ticks_ms()
 
-cur_xpub_index = 0
-cur_xpub = xpubs[cur_xpub_index]
+cur_script_index = 0
+cur_xpub = xpubs[cur_script_index]
 cur_addr_index = 0
 
 def render_addr_qrcode():
@@ -212,18 +202,19 @@ while True:
         addr = render_addr_qrcode()
     
     elif joy_up.value() == 0:
-        cur_xpub_index -= 1
-        if cur_xpub_index < 0:
-            cur_xpub_index = len(xpubs) - 1
-        cur_xpub = xpubs[cur_xpub_index]
+        cur_script_index -= 1
+        if cur_script_index < 0:
+            cur_script_index = len(xpubs) - 1
+        cur_xpub = xpubs[cur_script_index]
         addr = render_addr_qrcode()
 
     elif joy_down.value() == 0:
-        cur_xpub_index += 1
-        if cur_xpub_index == len(xpubs):
-            cur_xpub_index = 0
-        cur_xpub = xpubs[cur_xpub_index]
+        cur_script_index += 1
+        if cur_script_index == len(xpubs):
+            cur_script_index = 0
+        cur_xpub = xpubs[cur_script_index]
         addr = render_addr_qrcode()
+        print("down")
 
     time.sleep(0.1)
 
