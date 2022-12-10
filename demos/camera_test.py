@@ -1,11 +1,14 @@
-
 import lvgl as lv
 import camera
 import ili9XXX
 from ili9XXX import st7789
 import fs_driver
-
 import time
+
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
 
 lv.init()
 
@@ -17,7 +20,7 @@ fs_driver.fs_register(fs_drv, 'S')
 opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
 
 disp = st7789(
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    **pins["st7789"],
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
@@ -70,28 +73,18 @@ img1.align(lv.ALIGN.CENTER, 0, 24)
 # Let LVGL finish updating before starting the camera(?)
 time.sleep(0.1)
 
-# Saola-1R wiring
-# sioc = SCL; siod = SDA
 camera.init(
     0,
+    **pins["camera"],
     format=camera.JPEG,
     framesize=camera.FRAME_240X240,
     fb_location=camera.PSRAM,
     xclk_freq=camera.XCLK_10MHz,
-    sioc=9,  # SCL
-    siod=8,  # SDA
-    vsync=7, href=6,
-    pclk=5, xclk=4,
-    d6=41, d7=42,
-    d4=39, d5=40,
-    d2=37, d3=38,
-    d0=35, d1=36,
-    reset=-1, pwdn=-1,  # not connected
 )
 
 camera.brightness(1)
-camera.mirror(1)
-camera.flip(1)
+camera.mirror(0)
+camera.flip(0)
 camera.saturation(2)
 camera.contrast(2)
 
