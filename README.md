@@ -81,7 +81,7 @@ Now we can compile the custom firmware:
 # Targeting the SAOLA_1R board
 # Note: we build to a dir inside the container (instead of the shared /code dir) because otherwise
 #   the compiler runs significantly slower.
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=SAOLA_1R BUILD=/root/build-saola_1r USER_C_MODULES=/code/deps/usermods/micropython.cmake
+make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=SAOLA_1R BUILD=/root/build-saola_1r USER_C_MODULES=/root/internal/usermods/micropython.cmake
 mkdir -p /code/build/saola_1r
 cp /root/build-saola_1r/bootloader/bootloader.bin /code/build/saola_1r/.
 cp /root/build-saola_1r/partition_table/partition-table.bin /code/build/saola_1r/.
@@ -130,12 +130,13 @@ pip install adafruit-ampy
 # List the files on the board
 ampy -p /dev/tty.usbserial-1110 ls
 
-# Transfer a file
+# Transfer files. Most of the demos require:
+ampy -p /dev/tty.usbserial-1110 put demos/pin_defs.py
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
 
 # Transfer a whole directory
-ampy -p /dev/tty.usbserial-1110 put embit
+ampy -p /dev/tty.usbserial-1110 put mydir
 
 # Run an arbitrary local python file on the ESP32 (not recommended; use mpremote -- see below)
 ampy -p /dev/tty.usbserial-1110 run test.py
