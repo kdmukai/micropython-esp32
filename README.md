@@ -110,6 +110,7 @@ Write the new firmware; the `write_flash` command is copied from the `idf.py` gu
 
 ### Saola-1R (S2 dev kit)
 ```bash
+cd build/saola_1r
 esptool.py -p /dev/tty.usbserial-1110 erase_flash
 esptool.py -p /dev/tty.usbserial-1110 -b 460800 --before default_reset --chip esp32s2  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 micropython.bin
 ```
