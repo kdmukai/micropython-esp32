@@ -85,6 +85,8 @@ cd /root
 ./compile.sh
 ```
 
+If compilation was successful, you'll be able to access the new .bin files outside of the Docker container (i.e. back on your local machine) in the project's build/ dir.
+
 
 ## Write the firmware to the board
 see: https://docs.micropython.org/en/latest/esp32/tutorial/intro.html#esp32-intro
