@@ -101,7 +101,7 @@ Put the board into bootloader update mode:
 
 The board's port name should be something like `/dev/tty.usbserial-1110`. Confirm with:
 ```
-ls /dev
+ls /dev/tty.*
 ```
 
 Write the new firmware; the `write_flash` command is copied from the `idf.py` guidance above when compilation is completed.
