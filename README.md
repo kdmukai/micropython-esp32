@@ -159,6 +159,11 @@ mpremote connect /dev/tty.usbserial-1110 repl
 
 # List files on the device
 mpremote connect /dev/tty.usbserial-1110 ls
+
+# Mount the current dir to make its files available as if it was onboard, then run
+#   a test file that depends on those imports.
+mpremote connect /dev/tty.usbserial-1110 mount . run blah/some_test_file.py
+
 ```
 
 
