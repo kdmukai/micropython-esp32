@@ -81,11 +81,8 @@ Now we can compile the custom firmware:
 # Targeting the SAOLA_1R board
 # Note: we build to a dir inside the container (instead of the shared /code dir) because otherwise
 #   the compiler runs significantly slower.
-make LV_CFLAGS="-DLV_COLOR_DEPTH=16 -DLV_COLOR_16_SWAP=1" BOARD=SAOLA_1R BUILD=/root/build-saola_1r USER_C_MODULES=/root/internal/usermods/micropython.cmake
-mkdir -p /code/build/saola_1r
-cp /root/build-saola_1r/bootloader/bootloader.bin /code/build/saola_1r/.
-cp /root/build-saola_1r/partition_table/partition-table.bin /code/build/saola_1r/.
-cp /root/build-saola_1r/micropython.bin /code/build/saola_1r/.
+cd /root
+./compile.sh
 ```
 
 
