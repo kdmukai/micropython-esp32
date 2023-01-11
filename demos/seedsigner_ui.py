@@ -3,26 +3,23 @@ import lvgl as lv
 import ili9XXX
 from ili9XXX import st7789
 
-import usys as sys
-sys.path.append('') # See: https://github.com/micropython/micropython/issues/6419
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
 
-try:
-    script_path = __file__[:__file__.rfind('/')] if __file__.find('/') >= 0 else '.'
-except NameError:
-    script_path = ''
+
 
 import fs_driver
 # FS driver init
 fs_drv = lv.fs_drv_t()
 fs_driver.fs_register(fs_drv, 'S')
 
-FONT__OPEN_SANS__REGULAR__17 = lv.font_load("S:%s/opensans_regular_17.bin" % script_path)
-FONT__OPEN_SANS__SEMIBOLD__20 = lv.font_load("S:%s/opensans_semibold_20.bin" % script_path)
+FONT__OPEN_SANS__REGULAR__17 = lv.font_load("S:/opensans_regular_17.bin")
+FONT__OPEN_SANS__SEMIBOLD__20 = lv.font_load("S:/opensans_semibold_20.bin")
 
 
 disp = st7789(
-    # Saola-1R
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    **pins["st7789"],
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 

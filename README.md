@@ -130,12 +130,13 @@ pip install adafruit-ampy
 # List the files on the board
 ampy -p /dev/tty.usbserial-1110 ls
 
-# Transfer a file
+# Transfer files. Most of the demos require:
+ampy -p /dev/tty.usbserial-1110 put demos/pin_defs.py
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
 ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_semibold_20.bin
 
 # Transfer a whole directory
-ampy -p /dev/tty.usbserial-1110 put embit
+ampy -p /dev/tty.usbserial-1110 put mydir
 
 # Run an arbitrary local python file on the ESP32 (not recommended; use mpremote -- see below)
 ampy -p /dev/tty.usbserial-1110 run test.py
@@ -158,6 +159,11 @@ mpremote connect /dev/tty.usbserial-1110 repl
 
 # List files on the device
 mpremote connect /dev/tty.usbserial-1110 ls
+
+# Mount the current dir to make its files available as if it was onboard, then run
+#   a test file that depends on those imports.
+mpremote connect /dev/tty.usbserial-1110 mount . run blah/some_test_file.py
+
 ```
 
 

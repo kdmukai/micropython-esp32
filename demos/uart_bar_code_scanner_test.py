@@ -1,6 +1,11 @@
 import time
 from machine import UART
 
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
+
 """
 Lightly adapted from:
 https://github.com/cryptoadvance/specter-diy/blob/1790c2cad3ecda3dbc3921fe574346591b85701b/src/hosts/qr.py
@@ -49,7 +54,6 @@ class QRHost:
 
     def init_uart(self, baudrate=9600):
         print("starting init_uart")
-        # self.uart.init(baudrate=baudrate, bits=8, parity=None, stop=1, rx=35, tx=36)
         self.uart.init(baudrate=baudrate, bits=8, parity=None, stop=1, rx=18, tx=17)
         print(f"init_uart({baudrate}) complete")
 

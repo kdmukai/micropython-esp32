@@ -6,6 +6,10 @@ import time
 from machine import UART
 from ili9XXX import st7789
 
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
 
 """
 Lightly adapted from:
@@ -14,62 +18,6 @@ https://github.com/cryptoadvance/specter-diy/blob/1790c2cad3ecda3dbc3921fe574346
 Tests just the bar code reader module UART connection to the mcu.
 """
 
-lv.init()
-
-time.sleep(0.1)
-
-# FS driver init
-fs_drv = lv.fs_drv_t()
-fs_driver.fs_register(fs_drv, 'S')
-opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
-
-disp = st7789(
-    # mosi=11, clk=12, cs=10, dc=1, rst=2,  # kit build
-    mosi=11, clk=12, cs=10, dc=13, rst=14,    # custom dev pcb
-    width=240, height=240, rot=ili9XXX.LANDSCAPE
-)
-
-time.sleep(0.1)
-
-scr = lv.scr_act()
-scr.clean()
-
-scr.set_style_bg_color(lv.color_hex(0x000000), 0)
-scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-
-### Top Nav ###
-top_nav = lv.obj(scr)
-top_nav.set_size(240, 48)
-top_nav.align(lv.ALIGN.TOP_LEFT, 0, 0)
-top_nav.set_style_bg_color(lv.color_hex(0x000000), 0)
-
-style = lv.style_t()
-style.init()
-style.set_pad_all(0)
-style.set_border_width(0)
-style.set_radius(0)
-top_nav.add_style(style, 0)
-
-label = lv.label(top_nav)
-label.center()
-label.set_style_text_font(opensans_semibold_20, 0)
-label.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
-label.set_text("UART Test")
-
-data_display = lv.label(scr)
-data_display.center()
-data_display.set_style_text_font(opensans_semibold_20, 0)
-data_display.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
-data_display.set_text("")
-data_display.set_size(240, 192)
-data_display.align(lv.ALIGN.CENTER, 0, 24)
-
-# Let LVGL finish updating before starting the UART
-time.sleep(0.1)
-
-data_display.set_text("Test?")
-
-time.sleep(0.1)
 
 # OK response from scanner
 SUCCESS = b"\x02\x00\x00\x01\x00\x33\x31"
@@ -235,18 +183,77 @@ class QRHost:
         # self.init_uart(baudrate=115200)
         # return True
 
-data_display.set_text("Initializing...")
+# data_display.set_text("Initializing...")
 
-time.sleep(0.1)
+# time.sleep(0.1)
 
 scanner = QRHost()
 print("Instantiated QRHost")
 
-data_display.set_text("Configuring...")
-time.sleep(0.1)
+# data_display.set_text("Configuring...")
+# time.sleep(0.1)
 
 scanner.configure()
 print("finished configure()")
+
+lv.init()
+
+time.sleep(0.1)
+
+# FS driver init
+fs_drv = lv.fs_drv_t()
+fs_driver.fs_register(fs_drv, 'S')
+opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
+
+disp = st7789(
+    **pins["st7789"],
+    width=240, height=240, rot=ili9XXX.LANDSCAPE
+)
+
+time.sleep(0.1)
+
+scr = lv.scr_act()
+scr.clean()
+
+scr.set_style_bg_color(lv.color_hex(0x000000), 0)
+scr.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
+
+### Top Nav ###
+top_nav = lv.obj(scr)
+top_nav.set_size(240, 48)
+top_nav.align(lv.ALIGN.TOP_LEFT, 0, 0)
+top_nav.set_style_bg_color(lv.color_hex(0x000000), 0)
+
+style = lv.style_t()
+style.init()
+style.set_pad_all(0)
+style.set_border_width(0)
+style.set_radius(0)
+top_nav.add_style(style, 0)
+
+label = lv.label(top_nav)
+label.center()
+label.set_style_text_font(opensans_semibold_20, 0)
+label.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
+label.set_text("UART Test")
+
+data_display = lv.label(scr)
+data_display.center()
+data_display.set_style_text_font(opensans_semibold_20, 0)
+data_display.set_style_text_color(lv.color_hex(0xf8f8f8), 0)
+data_display.set_text("")
+data_display.set_size(240, 192)
+data_display.align(lv.ALIGN.CENTER, 0, 24)
+
+# Let LVGL finish updating before starting the UART
+time.sleep(0.1)
+
+data_display.set_text("Test?")
+
+time.sleep(0.1)
+
+
+
 
 data_display.set_text("READY!")
 

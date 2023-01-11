@@ -11,6 +11,10 @@ import time
 
 from embit.bip39 import mnemonic_from_bytes
 
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
 
 # FS driver init
 fs_drv = lv.fs_drv_t()
@@ -18,46 +22,10 @@ fs_driver.fs_register(fs_drv, 'S')
 opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
 opensans_regular_17 = lv.font_load("S:/opensans_regular_17.bin")
 
-
-key1 = machine.Pin(3, machine.Pin.IN, machine.Pin.PULL_UP)
-key2 = machine.Pin(34, machine.Pin.IN, machine.Pin.PULL_UP)
-key3 = machine.Pin(33, machine.Pin.IN, machine.Pin.PULL_UP)
-
-joy_up = machine.Pin(13, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_down = machine.Pin(14, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_left = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_right = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
-joy_press = machine.Pin(17, machine.Pin.IN, machine.Pin.PULL_UP)
-
-buttons = [
-    (key1, "KEY1"),
-    (key2, "KEY2"),
-    (key3, "KEY3"),
-    (joy_up, "UP"),
-    (joy_down, "DOWN"),
-    (joy_left, "LEFT"),
-    (joy_right, "RIGHT"),
-    (joy_press, "PRESS"),
-]
-
-
 lv.init()
 
-"""
-    Pinouts for different boards:
-
-    ESP32-S3-DevKitC-1:
-        FSPID (11) = MOSI
-        mosi=11, clk=12, cs=10, dc=4, rst=5,
-
-    Unexpected Maker FeatherS3:
-        mosi=12, clk=6, cs=17, dc=14, rst=18,
-
-    Saola-1R:
-        mosi=11, clk=12, cs=10, dc=1, rst=2,
-"""
 disp = st7789(
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    **pins["st7789"],
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
@@ -88,7 +56,6 @@ top_nav_label_style.set_text_font(opensans_semibold_20)
 top_nav_label_style.set_text_color(lv.color_hex(0x000000))
 top_nav_label.add_style(top_nav_label_style, 0)
 
-
 flip_results = lv.label(scr)
 flip_results.set_width(120)
 flip_results.align_to(top_nav, lv.ALIGN.OUT_BOTTOM_MID, 0, 10)
@@ -105,6 +72,27 @@ instructions2 = lv.label(scr)
 instructions2.set_style_text_font(opensans_regular_17, 0)
 instructions2.set_text("UP for heads; DOWN for tails")
 instructions2.align_to(instructions, lv.ALIGN.OUT_TOP_MID, 0, 0)
+
+key1 = machine.Pin(pins["buttons"]["key1"], machine.Pin.IN, machine.Pin.PULL_UP)
+key2 = machine.Pin(pins["buttons"]["key2"], machine.Pin.IN, machine.Pin.PULL_UP)
+key3 = machine.Pin(pins["buttons"]["key3"], machine.Pin.IN, machine.Pin.PULL_UP)
+
+joy_up = machine.Pin(pins["buttons"]["joy_up"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_down = machine.Pin(pins["buttons"]["joy_down"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_left = machine.Pin(pins["buttons"]["joy_left"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_right = machine.Pin(pins["buttons"]["joy_right"], machine.Pin.IN, machine.Pin.PULL_UP)
+joy_press = machine.Pin(pins["buttons"]["joy_press"], machine.Pin.IN, machine.Pin.PULL_UP)
+
+buttons = [
+    (key1, "KEY1"),
+    (key2, "KEY2"),
+    (key3, "KEY3"),
+    (joy_up, "UP"),
+    (joy_down, "DOWN"),
+    (joy_left, "LEFT"),
+    (joy_right, "RIGHT"),
+    (joy_press, "PRESS"),
+]
 
 flips = ""
 

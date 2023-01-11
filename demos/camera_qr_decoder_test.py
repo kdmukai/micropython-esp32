@@ -10,13 +10,18 @@ import quirc
 
 lv.init()
 
+# see pin_defs.py and import the pin defs that match your build
+from pin_defs import dev_board as pins
+# from pin_defs import manual_wiring as pins
+
+
 # FS driver init
 fs_drv = lv.fs_drv_t()
 fs_driver.fs_register(fs_drv, 'S')
 opensans_semibold_20 = lv.font_load("S:/opensans_semibold_20.bin")
 
 disp = st7789(
-    mosi=11, clk=12, cs=10, dc=1, rst=2,
+    **pins["st7789"],
     width=240, height=240, rot=ili9XXX.LANDSCAPE
 )
 
@@ -86,21 +91,13 @@ formats:
 """
 camera.init(
     0,
+    **pins["camera"],
     # format=camera.JPEG,
     # format=camera.RGB565,
     format=camera.GRAYSCALE,
     framesize=camera.FRAME_240X240,
     fb_location=camera.PSRAM,
     xclk_freq=camera.XCLK_10MHz,
-    sioc=9,  # SCL
-    siod=8,  # SDA
-    vsync=7, href=6,
-    pclk=5, xclk=4,
-    d6=41, d7=42,
-    d4=39, d5=40,
-    d2=37, d3=38,
-    d0=35, d1=36,
-    reset=-1, pwdn=-1,  # not connected
 )
 
 camera.brightness(1)
